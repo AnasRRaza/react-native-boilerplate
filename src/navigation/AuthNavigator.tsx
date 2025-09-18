@@ -6,8 +6,8 @@ import { makeStyles } from '@rneui/themed';
 import ForgotPassword from '@/screens/Auth/ForgotPassword';
 import OTP from '@/screens/Auth/OTP';
 import ResetPassword from '@/screens/Auth/ResetPassword';
-import SignIn from '@/screens/Auth/SignIn';
-import Start from '@/screens/Auth/Start';
+import Signin from '@/screens/Auth/Signin';
+import Signup from '@/screens/Auth/Signup';
 import Privacy from '@/screens/Onboarding/Privacy';
 import Profile from '@/screens/Onboarding/Profile';
 import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
@@ -19,11 +19,9 @@ const AuthNavigator = () => {
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
-      <Stack.Navigator
-        screenOptions={{ headerShown: false }}
-        initialRouteName={AUTH_ROUTES.START}>
-        <Stack.Screen name={AUTH_ROUTES.START} component={Start} />
-        <Stack.Screen name={AUTH_ROUTES.SIGNIN} component={SignIn} />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name={AUTH_ROUTES.SIGNIN} component={Signin} />
+        <Stack.Screen name={AUTH_ROUTES.SIGNUP} component={Signup} />
         <Stack.Screen name={AUTH_ROUTES.OTP} component={OTP} />
         <Stack.Screen
           name={AUTH_ROUTES.FORGOT_PASSWORD}

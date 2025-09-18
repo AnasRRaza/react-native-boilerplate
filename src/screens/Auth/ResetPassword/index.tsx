@@ -1,6 +1,6 @@
 import React from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -38,7 +38,9 @@ const ResetPassword = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <Text style={styles.title}>Reset Password</Text>
       <Text style={styles.description}>Please enter your new password.</Text>
       {RESET_PASSWORD_FORM_FIELDS.map(_field => (
@@ -66,7 +68,7 @@ const ResetPassword = () => {
       <View style={styles.buttonContainer}>
         <Button title="Confirm" isShadow onPress={handleSubmit(onSubmit)} />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

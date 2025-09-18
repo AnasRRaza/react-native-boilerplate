@@ -11,9 +11,9 @@ import * as Yup from 'yup';
 
 import Button from '@/components/Button';
 import Input from '@/components/Input';
-import { SIGNIN_FORM_FIELDS } from '@/constants/auth';
+import { SIGNUP_FORM_FIELDS } from '@/constants/auth';
 import { COLORS } from '@/constants/colors';
-import { useLogin } from '@/hooks/useLogin';
+import { useSignup } from '@/hooks/useSignup';
 import { useToastNotification } from '@/hooks/useToast';
 import {
   APP_ROUTES,
@@ -22,21 +22,22 @@ import {
   STACKS,
   StacksNavigationProp,
 } from '@/types/routes';
-import { loginValidationSchema } from '@/utils/validationSchema';
+import { signupValidationSchema } from '@/utils/validationSchema';
 
-type TLoginForm = Yup.InferType<typeof loginValidationSchema>;
+type TSignupForm = Yup.InferType<typeof signupValidationSchema>;
 
-const Signin = () => {
+const Signup = () => {
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<TLoginForm>({
+  } = useForm<TSignupForm>({
     mode: 'onSubmit',
-    resolver: yupResolver(loginValidationSchema),
+    resolver: yupResolver(signupValidationSchema),
     defaultValues: {
       email: '',
       password: '',
+      confirm_password: '',
     },
   });
 
@@ -44,13 +45,13 @@ const Signin = () => {
   const navigation =
     useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
   const navigationStack = useNavigation<StacksNavigationProp>();
-  const { mutate: login, isPending } = useLogin();
+  const { mutate: signup, isPending } = useSignup();
   const toast = useToastNotification();
 
-  const onSubmit: SubmitHandler<TLoginForm> = data => {
-    login(data, {
+  const onSubmit: SubmitHandler<TSignupForm> = data => {
+    signup(data, {
       onSuccess: () => {
-        toast('Login successful!', 'success');
+        toast('Signup successful!', 'success');
         navigationStack.navigate(STACKS.APP, {
           screen: APP_ROUTES.HOME,
         });
@@ -61,18 +62,13 @@ const Signin = () => {
     });
   };
 
-  const handleForgotPassword = useCallback(
-    () => navigation.navigate(AUTH_ROUTES.FORGOT_PASSWORD),
-    [navigation],
-  );
-
   const handleContinueAnonymously = useCallback(
     () => navigation.navigate(AUTH_ROUTES.PROFILE),
     [navigation],
   );
 
-  const handleSignup = useCallback(
-    () => navigation.navigate(AUTH_ROUTES.SIGNUP),
+  const handleSignin = useCallback(
+    () => navigation.navigate(AUTH_ROUTES.SIGNIN),
     [navigation],
   );
 
@@ -81,18 +77,13 @@ const Signin = () => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Welcome Back!</Text>
-          <Text style={styles.signup} onPress={handleSignup}>
-            Signup
-          </Text>
-        </View>
-        <Text style={styles.description}>Sign in to your account</Text>
-        {SIGNIN_FORM_FIELDS.map(_field => (
+        <Text style={styles.title}>Welcome!</Text>
+        <Text style={styles.description}>Sign up to your account</Text>
+        {SIGNUP_FORM_FIELDS.map(_field => (
           <Controller
             key={_field.name}
             control={control}
-            name={_field.name as keyof TLoginForm}
+            name={_field.name as keyof TSignupForm}
             render={({ field }) => (
               <Input
                 key={field.name}
@@ -114,14 +105,17 @@ const Signin = () => {
             )}
           />
         ))}
-        <View style={styles.forgotPasswordContainer}>
-          <Text style={styles.forgotPassword} onPress={handleForgotPassword}>
-            Forgot Password?
+        <View style={styles.alreadyHaveAccount}>
+          <Text style={styles.alreadyHaveAccountText}>
+            Already have an account?{' '}
+            <Text style={styles.alreadyHaveAccountLink} onPress={handleSignin}>
+              Signin
+            </Text>
           </Text>
         </View>
         <View style={styles.buttonContainer}>
           <Button
-            title="Sign In"
+            title="Sign Up"
             isShadow
             onPress={handleSubmit(onSubmit)}
             loading={isPending}
@@ -172,7 +166,7 @@ const Signin = () => {
   );
 };
 
-export default Signin;
+export default Signup;
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -204,14 +198,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginTop: verticalScale(10),
     marginBottom: verticalScale(20),
   },
-  forgotPasswordContainer: {
+  alreadyHaveAccount: {
     alignItems: 'center',
     marginBottom: verticalScale(20),
   },
-  forgotPassword: {
+  alreadyHaveAccountText: {
     fontSize: moderateScale(14),
     fontWeight: '400',
+    color: theme.colors.grey3,
+  },
+  alreadyHaveAccountLink: {
     color: theme.colors.primary,
+    fontWeight: '500',
   },
   orText: {
     textAlign: 'center',

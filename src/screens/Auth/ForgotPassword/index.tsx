@@ -1,6 +1,6 @@
 import React from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -43,7 +43,9 @@ const ForgotPassword = () => {
   const handleBackToLogin = () => navigation.goBack();
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <Text style={styles.title}>Forgot Password</Text>
       <Text style={styles.description}>
         Please enter your email to recover your password.
@@ -75,7 +77,7 @@ const ForgotPassword = () => {
       <Text style={styles.backToLogin} onPress={handleBackToLogin}>
         Back to Login
       </Text>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
