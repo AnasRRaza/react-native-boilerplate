@@ -5,20 +5,22 @@
  * @format
  */
 
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@rneui/themed';
 
+import AppNavigationContainer from '@/navigation/NavigationContainer';
 import { theme } from '@/theme';
-
-import Home from './src/Home';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <SafeAreaProvider>
-        <Home />
-      </SafeAreaProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider theme={theme}>
+        <SafeAreaProvider>
+          <AppNavigationContainer />
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 
