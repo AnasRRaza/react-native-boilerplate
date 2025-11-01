@@ -16,7 +16,7 @@ export const theme = createTheme({
   components: {
     Text: () => ({
       style: {
-        fontFamily: FONTS.OUTFIT,
+        fontFamily: FONTS.INTER,
       },
     }),
   },
