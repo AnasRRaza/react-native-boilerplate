@@ -1,3 +1,3 @@
 export const FONTS = {
-  OUTFIT: 'Outfit',
+  INTER: 'Inter',
 };

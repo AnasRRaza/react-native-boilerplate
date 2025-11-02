@@ -48,6 +48,7 @@ module.exports = {
     'no-var': 'error',
     'require-await': 'error',
     'simple-import-sort/exports': 'error',
+    'react/no-unstable-nested-components': 'off',
     'simple-import-sort/imports': [
       'error',
       {

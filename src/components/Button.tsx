@@ -1,52 +1,33 @@
 import React from 'react';
-import { Pressable } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import { Button as RNEButton, ButtonProps, makeStyles } from '@rneui/themed';
 
-interface Props extends ButtonProps {
-  isShadow?: boolean;
-}
+interface Props extends ButtonProps {}
 
-const Button: React.FC<Props> = ({ isShadow = false, ...props }) => {
+const Button: React.FC<Props> = ({ ...props }) => {
   const styles = useStyles(props.type);
-
-  if (isShadow) {
-    return (
-      <Pressable style={styles.container}>
-        <RNEButton
-          {...props}
-          buttonStyle={[styles.button, props.buttonStyle]}
-          titleStyle={[styles.buttonTitle, props.titleStyle]}
-          disabledStyle={styles.disabledButton}
-          disabledTitleStyle={styles.disabledButtonTitle}
-        />
-      </Pressable>
-    );
-  }
 
   return (
     <RNEButton
       {...props}
       buttonStyle={[styles.button, props.buttonStyle]}
       titleStyle={[styles.buttonTitle, props.titleStyle]}
-      disabledStyle={styles.disabledButton}
-      disabledTitleStyle={styles.disabledButtonTitle}
+      loadingStyle={styles.loadingStyle}
+      disabledStyle={[
+        props.type === 'outline'
+          ? styles.disabledButtonOutline
+          : styles.disabledButton,
+      ]}
+      disabledTitleStyle={[
+        props.type === 'outline'
+          ? styles.disabledButtonOutlineTitle
+          : styles.disabledButtonTitle,
+      ]}
     />
   );
 };
 
 const useStyles = makeStyles((theme, type) => ({
-  container: {
-    borderRadius: 12,
-    shadowColor: theme.colors.black,
-    shadowOffset: {
-      width: 4,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
   button: {
     borderRadius: 12,
     padding: moderateScale(14),
@@ -59,11 +40,21 @@ const useStyles = makeStyles((theme, type) => ({
     fontSize: moderateScale(16),
     fontWeight: '600',
   },
+  loadingStyle: {
+    paddingVertical: 0.7,
+  },
   disabledButton: {
     backgroundColor: `${theme.colors.primary}80`,
   },
   disabledButtonTitle: {
     color: theme.colors.white,
+  },
+  disabledButtonOutline: {
+    borderColor: `${theme.colors.primary}80`,
+    backgroundColor: 'transparent',
+  },
+  disabledButtonOutlineTitle: {
+    color: `${theme.colors.grey2}80`,
   },
 }));
 

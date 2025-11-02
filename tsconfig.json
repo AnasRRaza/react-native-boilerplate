@@ -1,14 +1,11 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json",
+  "extends": "@react-native/typescript-config",
   "compilerOptions": {
-    "jsx": "react",
-    "strict": true,
-    "allowJs": true,
-    "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*", "./assets/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["**/node_modules", "**/Pods"]
 }

@@ -1,84 +1,15 @@
-const COUNTRIES = [
-  {
-    label: 'United States',
-    value: 'United States',
-  },
-  {
-    label: 'Canada',
-    value: 'Canada',
-  },
-  {
-    label: 'United Kingdom',
-    value: 'United Kingdom',
-  },
-  {
-    label: 'Australia',
-    value: 'Australia',
-  },
-  {
-    label: 'New Zealand',
-    value: 'New Zealand',
-  },
-  {
-    label: 'India',
-    value: 'India',
-  },
-  {
-    label: 'Pakistan',
-    value: 'Pakistan',
-  },
-  {
-    label: 'Bangladesh',
-    value: 'Bangladesh',
-  },
-  {
-    label: 'Sri Lanka',
-    value: 'Sri Lanka',
-  },
-  {
-    label: 'Malaysia',
-    value: 'Malaysia',
-  },
-  {
-    label: 'Philippines',
-    value: 'Philippines',
-  },
-  {
-    label: 'Thailand',
-    value: 'Thailand',
-  },
-  {
-    label: 'Vietnam',
-    value: 'Vietnam',
-  },
-  {
-    label: 'Indonesia',
-    value: 'Indonesia',
-  },
-];
+import { PrivacyMode } from '@/models';
+import { Country, Interest, Language } from '@/types/common';
 
-const LANGUAGES = [
-  {
-    label: 'English',
-    value: 'English',
-  },
-  {
-    label: 'Spanish',
-    value: 'Spanish',
-  },
-  {
-    label: 'French',
-    value: 'French',
-  },
-  {
-    label: 'German',
-    value: 'German',
-  },
-  {
-    label: 'Italian',
-    value: 'Italian',
-  },
-];
+export const COUNTRIES = Object.values(Country).map(country => ({
+  label: country,
+  value: country,
+}));
+
+export const LANGUAGES = Object.values(Language).map(language => ({
+  label: language,
+  value: language,
+}));
 
 export const PROFILE_FORM_FIELDS = [
   {
@@ -91,7 +22,8 @@ export const PROFILE_FORM_FIELDS = [
     name: 'age',
     label: 'Age',
     placeholder: 'Enter your age',
-    leftIcon: 'calendar-outline',
+    leftIcon: 'time-outline',
+    keyboardType: 'number-pad',
   },
   {
     name: 'country',
@@ -114,40 +46,35 @@ export const PROFILE_FORM_FIELDS = [
 export const INTERESTS = [
   {
     label: 'Love',
-    value: 'Love',
+    value: Interest.LOVE,
   },
   {
     label: 'Grief',
-    value: 'Grief',
+    value: Interest.GRIEF,
   },
   {
     label: 'Belief',
-    value: 'Belief',
+    value: Interest.BELIEF,
   },
   {
     label: 'Joy',
-    value: 'Joy',
+    value: Interest.JOY,
   },
   {
     label: 'Struggle',
-    value: 'Struggle',
+    value: Interest.STRUGGLE,
   },
 ];
 
 export const PRIVACY_SETTINGS = [
   {
     label: 'Public',
-    value: 'Public',
-    description: 'Everyone can see your profile',
+    value: PrivacyMode.PUBLIC,
+    description: 'Everyone can see your responses',
   },
   {
     label: 'Private',
-    value: 'Private',
-    description: 'Only you can see your profile',
-  },
-  {
-    label: 'Friends Only',
-    value: 'Friends',
-    description: 'Only friends can see your profile',
+    value: PrivacyMode.PRIVATE,
+    description: 'Only friends can see your responses',
   },
 ];

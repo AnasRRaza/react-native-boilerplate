@@ -36,7 +36,7 @@ const Input: React.FC<Props> = ({ ...props }) => {
         secureTextEntry ? (
           <Icon
             name={isPasswordHidden ? 'eye-outline' : 'eye-off-outline'}
-            color={theme.colors.primary}
+            color={theme.colors.black}
             size={moderateScale(20)}
             onPress={() => setPasswordHidden(!isPasswordHidden)}
           />
@@ -55,18 +55,18 @@ const useStyles = makeStyles(theme => ({
   input: {
     borderWidth: 1,
     borderRadius: theme.spacing.lg,
-    borderColor: theme.colors.primary,
+    borderColor: theme.colors.grey4,
     paddingHorizontal: moderateScale(16),
     paddingVertical: verticalScale(5),
-    backgroundColor: theme.colors.white,
+    backgroundColor: theme.colors.background,
     marginHorizontal: moderateScale(-8),
   },
   inputText: {
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
     fontSize: moderateScale(16),
   },
   label: {
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
     fontWeight: '400',
     fontSize: moderateScale(16),
     marginBottom: verticalScale(8),
@@ -77,7 +77,7 @@ const useStyles = makeStyles(theme => ({
     height: 30,
   },
   error: {
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
     fontSize: moderateScale(14),
     marginHorizontal: moderateScale(-8),
   },

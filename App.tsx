@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
-import { StatusBar } from 'react-native';
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ */
+
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import Toast from 'react-native-toast-message';
 import { ToastProvider } from 'react-native-toast-notifications';
 import { ThemeProvider } from '@rneui/themed';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -9,23 +14,35 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppNavigationContainer from '@/navigation/NavigationContainer';
 import { theme } from '@/theme';
 
-import '@/localization/i18n';
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
-function App(): React.JSX.Element {
-  const [queryClient] = useState(() => new QueryClient());
-
+function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
+        <ThemeProvider theme={theme}>
           <SafeAreaProvider>
-            <StatusBar />
-            <AppNavigationContainer />
-            <Toast />
+            <ToastProvider>
+              <AppNavigationContainer />
+            </ToastProvider>
           </SafeAreaProvider>
-        </ToastProvider>
+        </ThemeProvider>
       </QueryClientProvider>
-    </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 

@@ -23,7 +23,7 @@ const Dropdown: React.FC<DropdownProps> = ({ ...props }) => {
       <Text style={styles.label}>{label}</Text>
       <RNEDropdown
         {...props}
-        style={[styles.dropdown]}
+        style={[styles.dropdown, props.style]}
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
         inputSearchStyle={styles.inputSearchStyle}
@@ -67,9 +67,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   dropdown: {
     borderRadius: 12,
     padding: moderateScale(14),
-    backgroundColor: theme.colors.white,
+    backgroundColor: theme.colors.background,
     borderWidth: 1,
-    borderColor: theme.colors.grey3,
+    borderColor: theme.colors.grey4,
   },
   placeholderStyle: {
     fontSize: moderateScale(16),
@@ -92,9 +92,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.colors.grey3,
   },
   dropdownContainer: {
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: theme.colors.grey3,
+    borderColor: theme.colors.grey4,
+    marginBottom: verticalScale(20),
   },
   dropdownItemContainer: {
     borderRadius: 12,

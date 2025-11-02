@@ -1,43 +1,35 @@
-/* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createStackNavigator } from '@react-navigation/stack';
-import { makeStyles } from '@rneui/themed';
+import { useTheme } from '@rneui/themed';
 
-import Header from '@/components/Header';
-import Home from '@/screens/Home';
 import { APP_ROUTES, AppStackNavigatorParamList } from '@/types/routes';
+
+import DrawerNavigator from './DrawerNavigator';
 
 const Stack = createStackNavigator<AppStackNavigatorParamList>();
 
 const AppNavigator = () => {
-  const styles = useStyles();
+  const { theme } = useTheme();
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Stack.Navigator
         screenOptions={{
-          header: props => (
-            <Header title={props?.options?.title || ''} isBack />
-          ),
+          headerShown: false,
         }}>
-        <Stack.Screen
-          options={{
-            headerShown: false,
-          }}
-          name={APP_ROUTES.HOME}
-          component={Home}
-        />
+        <Stack.Screen name={APP_ROUTES.DRAWER} component={DrawerNavigator} />
       </Stack.Navigator>
     </SafeAreaView>
   );
 };
 
-const useStyles = makeStyles(theme => ({
-  safeArea: {
+const styles = StyleSheet.create({
+  container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
-}));
+});
 
 export default AppNavigator;
