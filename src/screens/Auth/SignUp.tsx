@@ -16,79 +16,64 @@ import { makeStyles, Text } from '@rneui/themed';
 import * as Yup from 'yup';
 
 import Button from '@/components/Button';
+import Checkbox from '@/components/Checkbox';
 import Input from '@/components/Input';
 import {
   PRIVACY_POLICY_URL,
-  SIGNIN_FORM_FIELDS,
+  SIGNUP_FORM_FIELDS,
   TERMS_OF_SERVICE_URL,
 } from '@/constants/auth';
 import { COLORS } from '@/constants/colors';
-import { useLogin } from '@/hooks/auth';
-import { useAuthStore } from '@/store/authStore';
+import { useSignup } from '@/hooks/auth';
 import { OTP_TYPE } from '@/types/common';
-import {
-  AUTH_ROUTES,
-  AuthStackNavigatorParamList,
-  ONBOARDING_ROUTES,
-  STACKS,
-  StacksNavigationProp,
-} from '@/types/routes';
-import { loginSchema, useToastNotification } from '@/utils';
+import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
+import { useToastNotification } from '@/utils';
+import { signupSchema } from '@/utils/validationSchemas';
 
-type TLoginForm = Yup.InferType<typeof loginSchema>;
+type TSignupForm = Yup.InferType<typeof signupSchema>;
 
-const Login = () => {
+const Signup = () => {
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<TLoginForm>({
+  } = useForm<TSignupForm>({
     mode: 'onSubmit',
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(signupSchema),
     defaultValues: {
       email: '',
       password: '',
+      confirm_password: '',
+      agreeToTerms: false,
     },
   });
 
   const styles = useStyles();
   const navigation =
     useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
-  const navigationStack = useNavigation<StacksNavigationProp>();
 
-  const { mutate: login, isPending } = useLogin();
+  const { mutate: signup, isPending } = useSignup();
 
-  const { setUser, setToken } = useAuthStore();
   const toast = useToastNotification();
 
-  const onSubmit: SubmitHandler<TLoginForm> = data => {
-    login(data, {
-      onSuccess: async response => {
-        if (response?.data) {
-          const { token, ...user } = response.data;
-          await Promise.all([setToken(token), setUser(user)]);
-          if (user.isOnboarded) {
-          } else {
-            navigationStack.navigate(STACKS.ONBOARDING, {
-              screen: ONBOARDING_ROUTES.PROFILE,
-            });
-          }
-        } else {
-          navigation.navigate(AUTH_ROUTES.OTP, {
-            email: data.email,
-            otpType: OTP_TYPE.SIGNUP,
-          });
-        }
+  const onSubmit: SubmitHandler<TSignupForm> = data => {
+    const payload = {
+      email: data.email,
+      password: data.password,
+    };
+    signup(payload, {
+      onSuccess: _data => {
+        toast(_data.message, 'success');
+        navigation.navigate(AUTH_ROUTES.OTP, {
+          email: data.email,
+          otpType: OTP_TYPE.SIGNUP,
+        });
       },
       onError: error => {
         toast(error.message, 'error');
       },
     });
   };
-
-  const handleForgotPassword = useCallback(() => {
-    navigation.navigate(AUTH_ROUTES.FORGOT_PASSWORD);
-  }, []);
 
   const handleTermsOfService = useCallback(() => {
     Linking.openURL(TERMS_OF_SERVICE_URL);
@@ -98,8 +83,8 @@ const Login = () => {
     Linking.openURL(PRIVACY_POLICY_URL);
   }, []);
 
-  const handleSignup = useCallback(() => {
-    navigation.navigate(AUTH_ROUTES.SIGNUP);
+  const handleSignin = useCallback(() => {
+    navigation.navigate(AUTH_ROUTES.SIGNIN);
   }, []);
 
   return (
@@ -107,18 +92,13 @@ const Login = () => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Welcome Back!</Text>
-          <Text style={styles.signup} onPress={handleSignup}>
-            Signup
-          </Text>
-        </View>
-        <Text style={styles.description}>Sign in to your account</Text>
-        {SIGNIN_FORM_FIELDS.map(_field => (
+        <Text style={styles.title}>Welcome!</Text>
+        <Text style={styles.description}>Sign up to your account</Text>
+        {SIGNUP_FORM_FIELDS.map(_field => (
           <Controller
             key={_field.name}
             control={control}
-            name={_field.name as keyof TLoginForm}
+            name={_field.name as keyof Omit<TSignupForm, 'agreeToTerms'>}
             render={({ field }) => (
               <Input
                 key={field.name}
@@ -140,14 +120,40 @@ const Login = () => {
             )}
           />
         ))}
-        <View style={styles.forgotPasswordContainer}>
-          <Text style={styles.forgotPassword} onPress={handleForgotPassword}>
-            Forgot Password?
-          </Text>
-        </View>
+        <Controller
+          control={control}
+          name="agreeToTerms"
+          render={({ field: { onChange, value } }) => (
+            <Checkbox
+              name="agreeToTerms"
+              checked={value}
+              onPress={() => onChange(!value)}
+              title={
+                <Text style={styles.privacyPolicy}>
+                  I agree to the{' '}
+                  <Text
+                    style={styles.privacyPolicyLink}
+                    onPress={handlePrivacyPolicy}>
+                    Privacy Policy
+                  </Text>{' '}
+                  and{' '}
+                  <Text
+                    style={styles.privacyPolicyLink}
+                    onPress={handleTermsOfService}>
+                    Terms of Service
+                  </Text>
+                </Text>
+              }
+              containerStyle={styles.privacyPolicyContainer}
+              wrapperStyle={styles.checkboxWrapper}
+              errors={errors}
+            />
+          )}
+        />
+
         <View style={styles.buttonContainer}>
           <Button
-            title="Sign In"
+            title="Sign Up"
             onPress={handleSubmit(onSubmit)}
             loading={isPending}
           />
@@ -171,7 +177,6 @@ const Login = () => {
               titleStyle={styles.appleButtonTitle}
               type="outline"
               title="Continue with Apple"
-              onPress={() => {}}
               icon={
                 <Icon
                   name="logo-apple"
@@ -183,29 +188,21 @@ const Login = () => {
             />
           )}
         </View>
-        <View style={styles.privacyPolicyContainer}>
-          <Text style={styles.privacyPolicy}>
-            By continuing, you agree to our{' '}
-            <Text
-              style={styles.privacyPolicyLink}
-              onPress={handlePrivacyPolicy}>
-              Privacy Policy
-            </Text>{' '}
-            and{' '}
-            <Text
-              style={styles.privacyPolicyLink}
-              onPress={handleTermsOfService}>
-              Terms of Service
+        <View style={styles.alreadyHaveAccount}>
+          <Text style={styles.alreadyHaveAccountText}>
+            Already have an account?{' '}
+            <Text style={styles.alreadyHaveAccountLink} onPress={handleSignin}>
+              Signin
             </Text>
           </Text>
         </View>
-        <View style={styles.spacer} />
+        <View style={styles.bottomSpacing} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
-export default Login;
+export default Signup;
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -237,15 +234,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginTop: verticalScale(10),
     marginBottom: verticalScale(20),
   },
-  forgotPasswordContainer: {
-    alignItems: 'center',
-    marginBottom: verticalScale(20),
-  },
-  forgotPassword: {
-    fontSize: moderateScale(16),
-    fontWeight: '500',
-    color: theme.colors.primary,
-  },
   orText: {
     textAlign: 'center',
     fontSize: moderateScale(16),
@@ -253,6 +241,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.colors.grey3,
   },
   buttonContainer: {
+    marginTop: verticalScale(10),
     gap: verticalScale(14),
   },
   appleButton: {
@@ -265,20 +254,38 @@ const useStyles = makeStyles((theme: Theme) => ({
   icon: {
     marginRight: moderateScale(10),
   },
-  privacyPolicyContainer: {
+  checkboxWrapper: {
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    gap: 10,
+  },
+  alreadyHaveAccount: {
     alignItems: 'center',
     marginTop: verticalScale(20),
   },
+  alreadyHaveAccountText: {
+    fontSize: moderateScale(14),
+    fontWeight: '400',
+    color: theme.colors.grey3,
+  },
+  alreadyHaveAccountLink: {
+    color: theme.colors.primary,
+    fontWeight: '500',
+  },
+  privacyPolicyContainer: {
+    padding: 0,
+    margin: 0,
+  },
   privacyPolicy: {
-    textAlign: 'center',
     fontSize: moderateScale(16),
     fontWeight: '400',
     color: theme.colors.grey1,
   },
   privacyPolicyLink: {
+    fontWeight: '500',
     color: theme.colors.primary,
   },
-  spacer: {
-    height: verticalScale(40),
+  bottomSpacing: {
+    height: 40,
   },
 }));

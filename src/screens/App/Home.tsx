@@ -10,7 +10,7 @@ const Home = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text h2>Welcome, {user?.name}!</Text>
+        <Text h2>Welcome, {user?.fullName}!</Text>
         <Text style={styles.subtitle}>Home Screen</Text>
       </View>
 

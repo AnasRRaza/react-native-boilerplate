@@ -62,11 +62,11 @@ const useStyles = makeStyles(theme => ({
     marginHorizontal: moderateScale(-8),
   },
   inputText: {
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
     fontSize: moderateScale(16),
   },
   label: {
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
     fontWeight: '400',
     fontSize: moderateScale(16),
     marginBottom: verticalScale(8),
@@ -77,7 +77,7 @@ const useStyles = makeStyles(theme => ({
     height: 30,
   },
   error: {
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
     fontSize: moderateScale(14),
     marginHorizontal: moderateScale(-8),
   },

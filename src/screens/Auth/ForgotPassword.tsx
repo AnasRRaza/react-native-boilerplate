@@ -1,50 +1,127 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { Button, Text } from '@rneui/themed';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { View } from 'react-native';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { Theme } from '@rneui/base';
+import { makeStyles, Text } from '@rneui/themed';
+import * as Yup from 'yup';
 
-import { Input } from '@/components';
-import { AUTH_ROUTES, AuthStackNavigationProp } from '@/types/routes';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
+import { COLORS } from '@/constants/colors';
+import { useForgotPassword } from '@/hooks/auth';
+import { OTP_TYPE } from '@/types/common';
+import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
+import { useToastNotification } from '@/utils';
+import { forgotPasswordSchema } from '@/utils/validationSchemas';
+
+type TForgotPasswordForm = Yup.InferType<typeof forgotPasswordSchema>;
 
 const ForgotPassword = () => {
-  const navigation = useNavigation<AuthStackNavigationProp>();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<TForgotPasswordForm>({
+    mode: 'onSubmit',
+    resolver: yupResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  const styles = useStyles();
+  const toast = useToastNotification();
+  const navigation =
+    useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
+
+  const onSubmit: SubmitHandler<TForgotPasswordForm> = data => {
+    forgotPassword(data, {
+      onSuccess: _data => {
+        toast(_data.message, 'success');
+        navigation.navigate(AUTH_ROUTES.OTP, {
+          email: data.email,
+          otpType: OTP_TYPE.FORGOT_PASSWORD,
+        });
+      },
+      onError: error => {
+        toast(error.message, 'error');
+      },
+    });
+  };
+
+  const handleBackToLogin = () => navigation.goBack();
 
   return (
     <View style={styles.container}>
-      <Text h2>Forgot Password</Text>
-      <Text style={styles.subtitle}>Enter your email to reset password</Text>
-      <Input
-        label="Email"
-        placeholder="Enter your email"
-        containerStyle={styles.input}
+      <Text style={styles.title}>Forgot Password</Text>
+      <Text style={styles.description}>
+        Please enter your email to recover your password.
+      </Text>
+      <Controller
+        control={control}
+        name={'email' as keyof TForgotPasswordForm}
+        render={({ field }) => (
+          <Input
+            label={'Email Address'}
+            placeholder={'Enter your email address'}
+            onChangeText={field.onChange}
+            errorMessage={errors?.[field.name]?.message}
+            autoCapitalize="none"
+            leftIcon={
+              <Icon name={'mail-outline'} size={22} color={COLORS.primary} />
+            }
+            {...field}
+          />
+        )}
       />
-      <Button
-        title="Send Reset Link"
-        onPress={() =>
-          navigation.navigate(AUTH_ROUTES.RESET_PASSWORD, { token: '' })
-        }
-        containerStyle={styles.button}
-      />
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Get Verification Code"
+          onPress={handleSubmit(onSubmit)}
+          loading={isPending}
+        />
+      </View>
+      <Text style={styles.backToLogin} onPress={handleBackToLogin}>
+        Back to Login
+      </Text>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+export default ForgotPassword;
+
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 20,
+    backgroundColor: theme.colors.background,
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: verticalScale(30),
   },
-  subtitle: {
-    marginTop: 10,
-    marginBottom: 30,
+  title: {
+    fontSize: moderateScale(24),
+    fontWeight: '500',
+    color: theme.colors.foreground,
   },
-  input: {
-    marginVertical: 10,
+  description: {
+    fontSize: moderateScale(16),
+    fontWeight: '400',
+    color: theme.colors.grey2,
+    marginTop: verticalScale(10),
+    marginBottom: verticalScale(24),
   },
-  button: {
-    marginVertical: 20,
+  buttonContainer: {
+    marginTop: verticalScale(10),
   },
-});
-
-export default ForgotPassword;
+  backToLogin: {
+    marginTop: verticalScale(24),
+    fontSize: moderateScale(16),
+    fontWeight: '500',
+    color: theme.colors.primary,
+    textAlign: 'center',
+  },
+}));

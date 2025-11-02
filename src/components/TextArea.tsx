@@ -35,7 +35,7 @@ const TextArea: React.FC<Props> = ({
 
 const useStyles = makeStyles(theme => ({
   label: {
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
     fontWeight: '400',
     fontSize: moderateScale(16),
     marginBottom: verticalScale(8),
@@ -59,7 +59,7 @@ const useStyles = makeStyles(theme => ({
   inputStyle: {
     fontSize: moderateScale(16),
     fontWeight: '400',
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
   },
   leftIconContainer: {
     height: 30,
@@ -67,7 +67,7 @@ const useStyles = makeStyles(theme => ({
     alignSelf: 'flex-start',
   },
   error: {
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
     fontSize: moderateScale(14),
     marginHorizontal: moderateScale(-8),
   },

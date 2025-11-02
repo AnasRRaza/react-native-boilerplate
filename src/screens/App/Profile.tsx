@@ -13,11 +13,11 @@ const Profile = () => {
         <Avatar
           size={100}
           rounded
-          title={user?.name?.charAt(0) || 'U'}
+          title={user?.fullName?.charAt(0) || 'U'}
           containerStyle={styles.avatar}
         />
         <Text h3 style={styles.name}>
-          {user?.name}
+          {user?.fullName}
         </Text>
         <Text style={styles.email}>{user?.email || 'Anonymous User'}</Text>
       </View>
@@ -29,7 +29,7 @@ const Profile = () => {
           </Text>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>User ID:</Text>
-            <Text style={styles.infoValue}>{user?.id}</Text>
+            <Text style={styles.infoValue}>{user?._id}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Onboarding Complete:</Text>

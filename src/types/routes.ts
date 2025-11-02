@@ -2,6 +2,7 @@ import {
   CompositeNavigationProp,
   NavigatorScreenParams,
 } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 // Stack names
@@ -13,7 +14,9 @@ export enum STACKS {
 
 // Auth routes
 export enum AUTH_ROUTES {
+  START = 'start',
   SIGNIN = 'signin',
+  SIGNUP = 'signup',
   OTP = 'otp',
   FORGOT_PASSWORD = 'forgot_password',
   RESET_PASSWORD = 'reset_password',
@@ -28,6 +31,7 @@ export enum ONBOARDING_ROUTES {
 // App routes
 export enum APP_ROUTES {
   DRAWER = 'drawer',
+  HOME = 'home',
   // Add more app routes here as needed
 }
 
@@ -46,16 +50,36 @@ export enum DRAWER_ROUTES {
 
 // Auth Stack Param List
 export type AuthStackNavigatorParamList = {
+  [AUTH_ROUTES.START]: undefined;
   [AUTH_ROUTES.SIGNIN]: undefined;
-  [AUTH_ROUTES.OTP]: { email?: string; phone?: string };
+  [AUTH_ROUTES.SIGNUP]: undefined;
+  [AUTH_ROUTES.OTP]: {
+    email: string;
+    otpType: 'signup' | 'forgot-password';
+  };
   [AUTH_ROUTES.FORGOT_PASSWORD]: undefined;
-  [AUTH_ROUTES.RESET_PASSWORD]: { token?: string };
+  [AUTH_ROUTES.RESET_PASSWORD]: {
+    email: string;
+    token: string;
+  };
 };
 
 // Onboarding Stack Param List
 export type OnboardingStackNavigatorParamList = {
   [ONBOARDING_ROUTES.PROFILE]: undefined;
-  [ONBOARDING_ROUTES.PRIVACY]: undefined;
+  [ONBOARDING_ROUTES.PRIVACY]: {
+    profileData: {
+      fullName: string;
+      age: string;
+      country: string;
+      preferredLanguage: string;
+      profileImage?: {
+        uri?: string;
+        fileName?: string;
+        type?: string;
+      };
+    };
+  };
 };
 
 // Bottom Tab Param List
@@ -104,4 +128,9 @@ export type MainStackNavigationProp = CompositeNavigationProp<
 export type AppNavigationProp = CompositeNavigationProp<
   StackNavigationProp<AppStackNavigatorParamList>,
   StackNavigationProp<RootStackParamList>
+>;
+
+export type StacksNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  keyof RootStackParamList
 >;

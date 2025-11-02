@@ -26,11 +26,11 @@ const CustomDrawer = (props: DrawerContentComponentProps) => {
         <Avatar
           size={70}
           rounded
-          title={user?.name?.charAt(0) || 'U'}
+          title={user?.fullName?.charAt(0) || 'U'}
           containerStyle={styles.avatar}
         />
         <Text h4 style={styles.name}>
-          {user?.name}
+          {user?.fullName}
         </Text>
         <Text style={styles.email}>{user?.email || 'Anonymous User'}</Text>
       </View>

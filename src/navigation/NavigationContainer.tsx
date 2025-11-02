@@ -1,8 +1,10 @@
 /* eslint-disable no-nested-ternary */
-import React, { useEffect } from 'react';
-import { NavigationContainer as RNNavigationContainer } from '@react-navigation/native';
+import React from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
+import { COLORS } from '@/constants/colors';
 import { useAuthStore } from '@/store/authStore';
 import { RootStackParamList, STACKS } from '@/types/routes';
 
@@ -14,37 +16,21 @@ import OnboardingNavigator from './OnboardingNavigator';
 const RootStack = createStackNavigator<RootStackParamList>();
 
 const AppNavigationContainer = () => {
-  const { authToken, user, isLoading, setIsLoading } = useAuthStore();
+  const { token, user, isInitialized } = useAuthStore();
 
-  useEffect(() => {
-    // Initialize app - check for stored auth token
-    // This is where you would restore auth state from AsyncStorage
-    const initializeAuth = () => {
-      try {
-        // TODO: Check AsyncStorage for auth token
-        // const token = await AsyncStorage.getItem('authToken');
-        // if (token) {
-        //   // Validate token and get user data
-        // }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeAuth();
-  }, []);
-
-  if (isLoading) {
-    // TODO: Show splash screen or loading indicator
-    return null;
+  // Wait for auth store to rehydrate from AsyncStorage
+  if (!isInitialized) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
   }
 
   return (
-    <RNNavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={navigationRef}>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        {authToken ? (
+        {token ? (
           user?.isOnboarded ? (
             <RootStack.Screen name={STACKS.APP} component={AppNavigator} />
           ) : (
@@ -57,8 +43,17 @@ const AppNavigationContainer = () => {
           <RootStack.Screen name={STACKS.AUTH} component={AuthNavigator} />
         )}
       </RootStack.Navigator>
-    </RNNavigationContainer>
+    </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+});
 
 export default AppNavigationContainer;

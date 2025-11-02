@@ -1,95 +1,323 @@
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Text } from '@rneui/themed';
+import React, { useCallback, useState } from 'react';
+import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Theme } from '@rneui/base';
+import { makeStyles, Text } from '@rneui/themed';
 
-import { Checkbox } from '@/components';
+import Button from '@/components/Button';
+import { COLORS } from '@/constants/colors';
+import { INTERESTS, PRIVACY_SETTINGS } from '@/constants/onboarding';
+import { useUpdateProfile } from '@/hooks/auth';
+import { useUploadMedia } from '@/hooks/auth/useUploadMedia';
 import { useAuthStore } from '@/store/authStore';
+import {
+  ONBOARDING_ROUTES,
+  OnboardingStackNavigatorParamList,
+  StacksNavigationProp,
+} from '@/types/routes';
+import { useToastNotification } from '@/utils';
 
-const Privacy = () => {
-  const [termsAccepted, setTermsAccepted] = React.useState(false);
-  const [privacyAccepted, setPrivacyAccepted] = React.useState(false);
-  const updateUser = useAuthStore(state => state.updateUser);
+interface Props
+  extends NativeStackScreenProps<
+    OnboardingStackNavigatorParamList,
+    ONBOARDING_ROUTES.PRIVACY
+  > {}
 
-  const handleComplete = () => {
-    // Mark user as onboarded
-    updateUser({ isOnboarded: true });
+const Privacy: React.FC<Props> = ({ route }) => {
+  const { profileData } = route.params;
+  const { fullName, age, country, preferredLanguage, profileImage } =
+    profileData;
+  const [interests, setInterests] = useState<string[]>([]);
+  const [privacyMode, setPrivacyMode] = useState('');
+
+  const styles = useStyles();
+  const { setUser, user } = useAuthStore();
+  const navigation = useNavigation<StacksNavigationProp>();
+  const toast = useToastNotification();
+  const { mutate: updateProfile, isPending } = useUpdateProfile();
+  const { mutate: uploadMedia, isPending: isUploadingMedia } = useUploadMedia();
+
+  const handleInterests = useCallback((interest: string) => {
+    setInterests((prev: string[]) => {
+      const isSelected = prev.includes(interest);
+      if (isSelected) {
+        return prev.filter(item => item !== interest);
+      }
+
+      return [...prev, interest];
+    });
+  }, []);
+
+  const handlePrivacySettings = useCallback((privacy: string) => {
+    setPrivacyMode(privacy);
+  }, []);
+
+  const onSubmit = () => {
+    if (profileImage) {
+      uploadMedia(
+        { file: profileImage },
+        {
+          onSuccess: _response => {
+            if (_response.data) {
+              updateProfile(
+                {
+                  fullName,
+                  age: Number(age),
+                  country,
+                  preferredLanguage,
+                  interests,
+                  privacyMode,
+                  profilePicture: _response.data?.key,
+                },
+                {
+                  onSuccess: async response => {
+                    if (response.data) {
+                      await setUser({
+                        ...user,
+                        ...response.data,
+                      });
+                      toast(response.message, 'success');
+                    }
+                  },
+                  onError: error => {
+                    toast(error.message, 'error');
+                  },
+                },
+              );
+            }
+          },
+          onError: error => {
+            toast(error.message, 'error');
+          },
+        },
+      );
+    }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text h2>Privacy & Terms</Text>
-      <Text style={styles.subtitle}>Please review and accept our policies</Text>
-
-      <View style={styles.content}>
-        <Text h4 style={styles.sectionTitle}>
-          Terms of Service
-        </Text>
-        <Text style={styles.text}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        </Text>
-
-        <Text h4 style={styles.sectionTitle}>
-          Privacy Policy
-        </Text>
-        <Text style={styles.text}>
-          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-          nisi ut aliquip ex ea commodo consequat.
-        </Text>
-
-        <Checkbox
-          title="I agree to the Terms of Service"
-          name="terms"
-          checked={termsAccepted}
-          onPress={() => setTermsAccepted(!termsAccepted)}
-          containerStyle={styles.checkbox}
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
+        <Icon
+          name="chevron-back-outline"
+          size={32}
+          color={COLORS.black}
+          style={styles.backIcon}
+          onPress={() => navigation.goBack()}
         />
-
-        <Checkbox
-          title="I agree to the Privacy Policy"
-          name="privacy"
-          checked={privacyAccepted}
-          onPress={() => setPrivacyAccepted(!privacyAccepted)}
-          containerStyle={styles.checkbox}
-        />
-
+        <Text style={styles.step}>Step 2</Text>
+      </View>
+      <Text style={styles.title}>Set up your profile</Text>
+      <Text style={styles.description}>
+        Tell us a bit about yourself to personalize your experience
+      </Text>
+      <Text style={styles.subTitle}>Your Interests</Text>
+      <View style={styles.interestsContainer}>
+        {INTERESTS.map(interest => (
+          <TouchableOpacity
+            key={interest.value}
+            style={[
+              styles.interestContainer,
+              interests.includes(interest.value) &&
+                styles.selectedInterestContainer,
+            ]}
+            onPress={() => handleInterests(interest.value)}>
+            <Text
+              key={interest.value}
+              style={[
+                styles.interestText,
+                interests.includes(interest.value) &&
+                  styles.selectedInterestText,
+              ]}>
+              {interest.label}
+            </Text>
+            {interests.includes(interest.value) ? (
+              <Icon name="close-outline" size={18} color={COLORS.black} />
+            ) : (
+              <Icon name="add-outline" size={18} color={COLORS.black} />
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+      <Text style={styles.subTitle}>Privacy Settings</Text>
+      <View style={styles.privacySettingsContainer}>
+        {PRIVACY_SETTINGS.map(privacy => (
+          <TouchableOpacity
+            key={privacy.value}
+            style={[
+              styles.privacySettingContainer,
+              privacyMode === privacy.value &&
+                styles.selectedPrivacySettingContainer,
+            ]}
+            onPress={() => handlePrivacySettings(privacy.value)}>
+            <View style={styles.radioButton}>
+              {privacyMode === privacy.value && (
+                <View style={styles.radioButtonInner} />
+              )}
+            </View>
+            <View style={styles.privacySettingContent}>
+              <Text style={styles.privacySettingText}>{privacy.label}</Text>
+              <Text style={styles.privacySettingDescription}>
+                {privacy.description}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View style={styles.buttonContainer}>
         <Button
-          title="Complete Onboarding"
-          onPress={handleComplete}
-          containerStyle={styles.button}
-          disabled={!termsAccepted || !privacyAccepted}
+          title="Continue"
+          onPress={onSubmit}
+          loading={isPending || isUploadingMedia}
         />
+      </View>
+      <View style={styles.privacyPolicyContainer}>
+        <Text style={styles.privacyPolicy}>
+          By continuing, you agree to our{' '}
+          <Text style={styles.privacyPolicyLink}>Privacy Policy</Text> and{' '}
+          <Text style={styles.privacyPolicyLink}>Terms of Service</Text>
+        </Text>
       </View>
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
+export default Privacy;
+
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: theme.colors.background,
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: verticalScale(10),
   },
-  subtitle: {
-    marginTop: 10,
-    marginBottom: 20,
+  contentContainer: {
+    paddingBottom: verticalScale(40),
   },
-  content: {
-    marginBottom: 40,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: verticalScale(10),
   },
-  sectionTitle: {
-    marginTop: 20,
-    marginBottom: 10,
+  step: {
+    fontSize: moderateScale(16),
+    fontWeight: '500',
+    color: theme.colors.grey2,
   },
-  text: {
-    marginBottom: 15,
-    lineHeight: 22,
+  backIcon: {
+    marginLeft: moderateScale(-8),
   },
-  checkbox: {
-    marginVertical: 10,
+  title: {
+    fontSize: moderateScale(24),
+    fontWeight: '500',
+    color: theme.colors.foreground,
   },
-  button: {
-    marginVertical: 30,
+  description: {
+    fontSize: moderateScale(16),
+    fontWeight: '400',
+    color: theme.colors.grey2,
+    marginTop: verticalScale(10),
+    marginBottom: verticalScale(24),
   },
-});
-
-export default Privacy;
+  subTitle: {
+    fontSize: moderateScale(16),
+    fontWeight: '500',
+    color: theme.colors.grey2,
+  },
+  interestsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: verticalScale(10),
+    marginTop: verticalScale(14),
+    marginBottom: verticalScale(20),
+  },
+  interestContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: moderateScale(4),
+    justifyContent: 'center',
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: verticalScale(5),
+    borderRadius: moderateScale(50),
+    backgroundColor: `${theme.colors.primary}40`,
+  },
+  selectedInterestContainer: {
+    backgroundColor: theme.colors.primary,
+  },
+  interestText: {
+    color: theme.colors.black,
+    fontSize: moderateScale(16),
+    fontWeight: '400',
+  },
+  selectedInterestText: {
+    color: theme.colors.white,
+  },
+  privacySettingsContainer: {
+    gap: verticalScale(10),
+    marginTop: verticalScale(14),
+    marginBottom: verticalScale(20),
+  },
+  privacySettingContainer: {
+    flexDirection: 'row',
+    gap: verticalScale(10),
+    padding: moderateScale(16),
+    borderRadius: moderateScale(16),
+    borderWidth: 1,
+    borderColor: theme.colors.grey3,
+  },
+  selectedPrivacySettingContainer: {
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+  },
+  privacySettingText: {
+    color: theme.colors.black,
+    fontSize: moderateScale(16),
+    fontWeight: '400',
+  },
+  privacySettingDescription: {
+    color: theme.colors.grey2,
+    fontSize: moderateScale(14),
+    fontWeight: '400',
+  },
+  privacySettingContent: {
+    flexDirection: 'column',
+    gap: verticalScale(4),
+  },
+  radioButton: {
+    width: moderateScale(20),
+    height: moderateScale(20),
+    borderRadius: moderateScale(10),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.grey3,
+  },
+  radioButtonInner: {
+    width: moderateScale(10),
+    height: moderateScale(10),
+    borderRadius: moderateScale(5),
+    backgroundColor: theme.colors.primary,
+  },
+  buttonContainer: {
+    marginTop: verticalScale(10),
+  },
+  privacyPolicyContainer: {
+    alignItems: 'center',
+    marginTop: verticalScale(20),
+  },
+  privacyPolicy: {
+    textAlign: 'center',
+    fontSize: moderateScale(16),
+    fontWeight: '400',
+    color: theme.colors.grey1,
+  },
+  privacyPolicyLink: {
+    color: theme.colors.primary,
+  },
+}));
