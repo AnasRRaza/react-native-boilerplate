@@ -1,9 +1,11 @@
 import React from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Theme } from '@rneui/base';
 import { makeStyles, Text } from '@rneui/themed';
 import * as Yup from 'yup';
@@ -12,12 +14,21 @@ import Button from '@/components/Button';
 import Input from '@/components/Input';
 import { RESET_PASSWORD_FORM_FIELDS } from '@/constants/auth';
 import { COLORS } from '@/constants/colors';
-import { resetPasswordValidationSchema } from '@/utils/validationSchema';
+import { useResetPassword } from '@/hooks/auth';
+import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
+import { useToastNotification } from '@/utils';
+import { resetPasswordSchema } from '@/utils/validationSchemas';
 
-type TResetPasswordForm = Yup.InferType<typeof resetPasswordValidationSchema>;
+type TResetPasswordForm = Yup.InferType<typeof resetPasswordSchema>;
 
-const ResetPassword = () => {
-  const styles = useStyles();
+interface Props
+  extends NativeStackScreenProps<
+    AuthStackNavigatorParamList,
+    AUTH_ROUTES.RESET_PASSWORD
+  > {}
+
+const ResetPassword: React.FC<Props> = ({ route }) => {
+  const { email, token } = route.params;
 
   const {
     control,
@@ -25,22 +36,38 @@ const ResetPassword = () => {
     formState: { errors },
   } = useForm<TResetPasswordForm>({
     mode: 'onSubmit',
-    resolver: yupResolver(resetPasswordValidationSchema),
+    resolver: yupResolver(resetPasswordSchema),
     defaultValues: {
       password: '',
       confirm_password: '',
     },
   });
 
+  const styles = useStyles();
+  const toast = useToastNotification();
+  const { mutate: resetPassword, isPending } = useResetPassword();
+  const navigation =
+    useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
+
   const onSubmit: SubmitHandler<TResetPasswordForm> = data => {
-    console.log(data);
-    // TODO: Forgot Password API call
+    const payload = {
+      email,
+      token,
+      password: data.password,
+    };
+    resetPassword(payload, {
+      onSuccess: _data => {
+        toast(_data.message, 'success');
+        navigation.navigate(AUTH_ROUTES.SIGNIN);
+      },
+      onError: error => {
+        toast(error.message, 'error');
+      },
+    });
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <View style={styles.container}>
       <Text style={styles.title}>Reset Password</Text>
       <Text style={styles.description}>Please enter your new password.</Text>
       {RESET_PASSWORD_FORM_FIELDS.map(_field => (
@@ -66,9 +93,13 @@ const ResetPassword = () => {
         />
       ))}
       <View style={styles.buttonContainer}>
-        <Button title="Confirm" isShadow onPress={handleSubmit(onSubmit)} />
+        <Button
+          title="Confirm"
+          onPress={handleSubmit(onSubmit)}
+          loading={isPending}
+        />
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

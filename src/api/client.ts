@@ -137,7 +137,7 @@ apiClient.interceptors.response.use(
 
     // Extract error message from response
     const errorMessage =
-      error.response?.data?.message ||
+      (error.response?.data as { message?: string })?.message ||
       error.message ||
       'Something went wrong. Please try again.';
 

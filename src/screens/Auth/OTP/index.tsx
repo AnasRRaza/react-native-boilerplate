@@ -1,27 +1,82 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { OtpInput } from 'react-native-otp-entry';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Theme } from '@rneui/base';
 import { makeStyles, Text } from '@rneui/themed';
 
 import Button from '@/components/Button';
 import { COLORS } from '@/constants/colors';
+import { useResendOTP, useVerifyOTP } from '@/hooks/auth';
+import { useCounter } from '@/hooks/useCounter';
+import { OTP_TYPE } from '@/types/common';
 import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
+import { useToastNotification } from '@/utils';
 
-const OTP = () => {
+interface Props
+  extends NativeStackScreenProps<
+    AuthStackNavigatorParamList,
+    AUTH_ROUTES.OTP
+  > {}
+
+const OTP: React.FC<Props> = ({ route }) => {
+  const { email, otpType } = route.params;
   const [otp, setOtp] = useState('');
 
   const styles = useStyles();
   const navigation =
     useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
+  const { mutate: verifyOTP, isPending } = useVerifyOTP();
+  const { mutate: resendOTP, isPending: isResendOTPPending } = useResendOTP();
+  const { counter, resetCounter } = useCounter(0.5);
+  const toast = useToastNotification();
 
   const onSubmit = () => {
-    console.log(otp);
-    navigation.navigate(AUTH_ROUTES.PROFILE);
-    // TODO: Forgot Password API call
+    verifyOTP(
+      { email, otp, otpType },
+      {
+        onSuccess: _data => {
+          toast(_data.message, 'success');
+          if (otpType === OTP_TYPE.FORGOT_PASSWORD) {
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: AUTH_ROUTES.RESET_PASSWORD,
+                  params: { email, token: _data.data },
+                },
+              ],
+            });
+          } else {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: AUTH_ROUTES.SIGNIN }],
+            });
+          }
+        },
+        onError: error => {
+          toast(error.message, 'error');
+        },
+      },
+    );
+  };
+
+  const onResendOTP = () => {
+    resendOTP(
+      { email, otpType },
+      {
+        onSuccess: _data => {
+          toast(_data.message, 'success');
+          resetCounter();
+        },
+        onError: error => {
+          toast(error.message, 'error');
+        },
+      },
+    );
   };
 
   return (
@@ -57,10 +112,20 @@ const OTP = () => {
         <Button
           disabled={otp.length !== 6}
           title="Verify"
-          isShadow
           onPress={onSubmit}
+          loading={isPending}
         />
       </View>
+      <Text style={styles.resendOtp}>
+        Didn’t receive an OTP yet?{' '}
+        <TouchableOpacity
+          onPress={onResendOTP}
+          disabled={counter > 0 || isResendOTPPending}>
+          <Text style={styles.counter}>
+            {counter > 0 ? `00:${counter}` : 'Resend OTP'}
+          </Text>
+        </TouchableOpacity>
+      </Text>
     </View>
   );
 };
@@ -88,9 +153,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   pinCodeContainer: {
     borderWidth: 0.2,
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.white,
-    borderRadius: moderateScale(4),
+    borderColor: theme.colors.grey4,
+    backgroundColor: theme.colors.background,
+    borderRadius: moderateScale(6),
     height: moderateScale(50),
     width: moderateScale(50),
   },
@@ -113,5 +178,17 @@ const useStyles = makeStyles((theme: Theme) => ({
   backIcon: {
     marginBottom: verticalScale(10),
     marginLeft: moderateScale(-8),
+  },
+  resendOtp: {
+    marginTop: verticalScale(24),
+    fontSize: moderateScale(16),
+    fontWeight: '400',
+    color: theme.colors.grey3,
+    textAlign: 'center',
+  },
+  counter: {
+    color: theme.colors.primary,
+    fontSize: moderateScale(16),
+    marginBottom: verticalScale(-4),
   },
 }));

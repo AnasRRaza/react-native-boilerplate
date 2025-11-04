@@ -1,10 +1,9 @@
 /* eslint-disable no-nested-ternary */
 import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { COLORS } from '@/constants/colors';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuthStore } from '@/store/authStore';
 import { RootStackParamList, STACKS } from '@/types/routes';
 
@@ -20,11 +19,7 @@ const AppNavigationContainer = () => {
 
   // Wait for auth store to rehydrate from AsyncStorage
   if (!isInitialized) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
@@ -46,14 +41,5 @@ const AppNavigationContainer = () => {
     </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-});
 
 export default AppNavigationContainer;

@@ -79,12 +79,12 @@ const useStyles = makeStyles(theme => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    paddingHorizontal: theme.spacing.lg,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: moderateScale(24),
   },
   logoContainer: {
     alignItems: 'center',
@@ -126,7 +126,6 @@ const useStyles = makeStyles(theme => ({
     lineHeight: moderateScale(24),
   },
   actionsContainer: {
-    paddingHorizontal: moderateScale(24),
     paddingBottom: verticalScale(40),
   },
   signInButton: {

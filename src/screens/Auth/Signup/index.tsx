@@ -1,6 +1,12 @@
 import React, { useCallback } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  ScrollView,
+  View,
+} from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -10,21 +16,21 @@ import { makeStyles, Text } from '@rneui/themed';
 import * as Yup from 'yup';
 
 import Button from '@/components/Button';
+import Checkbox from '@/components/Checkbox';
 import Input from '@/components/Input';
-import { SIGNUP_FORM_FIELDS } from '@/constants/auth';
-import { COLORS } from '@/constants/colors';
-import { useSignup } from '@/hooks/useSignup';
-import { useToastNotification } from '@/hooks/useToast';
 import {
-  APP_ROUTES,
-  AUTH_ROUTES,
-  AuthStackNavigatorParamList,
-  STACKS,
-  StacksNavigationProp,
-} from '@/types/routes';
-import { signupValidationSchema } from '@/utils/validationSchema';
+  PRIVACY_POLICY_URL,
+  SIGNUP_FORM_FIELDS,
+  TERMS_OF_SERVICE_URL,
+} from '@/constants/auth';
+import { COLORS } from '@/constants/colors';
+import { useSignup } from '@/hooks/auth';
+import { OTP_TYPE } from '@/types/common';
+import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
+import { useToastNotification } from '@/utils';
+import { signupSchema } from '@/utils/validationSchemas';
 
-type TSignupForm = Yup.InferType<typeof signupValidationSchema>;
+type TSignupForm = Yup.InferType<typeof signupSchema>;
 
 const Signup = () => {
   const {
@@ -33,44 +39,53 @@ const Signup = () => {
     formState: { errors },
   } = useForm<TSignupForm>({
     mode: 'onSubmit',
-    resolver: yupResolver(signupValidationSchema),
+    resolver: yupResolver(signupSchema),
     defaultValues: {
       email: '',
       password: '',
       confirm_password: '',
+      agreeToTerms: false,
     },
   });
 
   const styles = useStyles();
   const navigation =
     useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
-  const navigationStack = useNavigation<StacksNavigationProp>();
+
   const { mutate: signup, isPending } = useSignup();
+
   const toast = useToastNotification();
 
   const onSubmit: SubmitHandler<TSignupForm> = data => {
-    signup(data, {
-      onSuccess: () => {
-        toast('Signup successful!', 'success');
-        navigationStack.navigate(STACKS.APP, {
-          screen: APP_ROUTES.HOME,
+    const payload = {
+      email: data.email,
+      password: data.password,
+    };
+    signup(payload, {
+      onSuccess: _data => {
+        toast(_data.message, 'success');
+        navigation.navigate(AUTH_ROUTES.OTP, {
+          email: data.email,
+          otpType: OTP_TYPE.SIGNUP,
         });
       },
-      onError: () => {
-        toast('Invalid email or password', 'error');
+      onError: error => {
+        toast(error.message, 'error');
       },
     });
   };
 
-  const handleContinueAnonymously = useCallback(
-    () => navigation.navigate(AUTH_ROUTES.PROFILE),
-    [navigation],
-  );
+  const handleTermsOfService = useCallback(() => {
+    Linking.openURL(TERMS_OF_SERVICE_URL);
+  }, []);
 
-  const handleSignin = useCallback(
-    () => navigation.navigate(AUTH_ROUTES.SIGNIN),
-    [navigation],
-  );
+  const handlePrivacyPolicy = useCallback(() => {
+    Linking.openURL(PRIVACY_POLICY_URL);
+  }, []);
+
+  const handleSignin = useCallback(() => {
+    navigation.navigate(AUTH_ROUTES.SIGNIN);
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -83,7 +98,7 @@ const Signup = () => {
           <Controller
             key={_field.name}
             control={control}
-            name={_field.name as keyof TSignupForm}
+            name={_field.name as keyof Omit<TSignupForm, 'agreeToTerms'>}
             render={({ field }) => (
               <Input
                 key={field.name}
@@ -105,18 +120,40 @@ const Signup = () => {
             )}
           />
         ))}
-        <View style={styles.alreadyHaveAccount}>
-          <Text style={styles.alreadyHaveAccountText}>
-            Already have an account?{' '}
-            <Text style={styles.alreadyHaveAccountLink} onPress={handleSignin}>
-              Signin
-            </Text>
-          </Text>
-        </View>
+        <Controller
+          control={control}
+          name="agreeToTerms"
+          render={({ field: { onChange, value } }) => (
+            <Checkbox
+              name="agreeToTerms"
+              checked={value}
+              onPress={() => onChange(!value)}
+              title={
+                <Text style={styles.privacyPolicy}>
+                  I agree to the{' '}
+                  <Text
+                    style={styles.privacyPolicyLink}
+                    onPress={handlePrivacyPolicy}>
+                    Privacy Policy
+                  </Text>{' '}
+                  and{' '}
+                  <Text
+                    style={styles.privacyPolicyLink}
+                    onPress={handleTermsOfService}>
+                    Terms of Service
+                  </Text>
+                </Text>
+              }
+              containerStyle={styles.privacyPolicyContainer}
+              wrapperStyle={styles.checkboxWrapper}
+              errors={errors}
+            />
+          )}
+        />
+
         <View style={styles.buttonContainer}>
           <Button
             title="Sign Up"
-            isShadow
             onPress={handleSubmit(onSubmit)}
             loading={isPending}
           />
@@ -124,6 +161,7 @@ const Signup = () => {
           <Button
             type="outline"
             title="Continue with Google"
+            onPress={() => {}}
             icon={
               <Icon
                 name="logo-google"
@@ -133,34 +171,32 @@ const Signup = () => {
               />
             }
           />
-          <Button
-            buttonStyle={styles.appleButton}
-            titleStyle={styles.appleButtonTitle}
-            type="outline"
-            title="Continue with Apple"
-            icon={
-              <Icon
-                name="logo-apple"
-                size={22}
-                color={COLORS.white}
-                style={styles.icon}
-              />
-            }
-          />
-          <Button
-            type="outline"
-            title="Continue Anonymously"
-            onPress={handleContinueAnonymously}
-          />
+          {Platform.OS === 'ios' && (
+            <Button
+              buttonStyle={styles.appleButton}
+              titleStyle={styles.appleButtonTitle}
+              type="outline"
+              title="Continue with Apple"
+              icon={
+                <Icon
+                  name="logo-apple"
+                  size={22}
+                  color={COLORS.white}
+                  style={styles.icon}
+                />
+              }
+            />
+          )}
         </View>
-        <View style={styles.privacyPolicyContainer}>
-          <Text style={styles.privacyPolicy}>
-            By continuing, you agree to our{' '}
-            <Text style={styles.privacyPolicyLink}>Privacy Policy</Text> and{' '}
-            <Text style={styles.privacyPolicyLink}>Terms of Service</Text>
+        <View style={styles.alreadyHaveAccount}>
+          <Text style={styles.alreadyHaveAccountText}>
+            Already have an account?{' '}
+            <Text style={styles.alreadyHaveAccountLink} onPress={handleSignin}>
+              Signin
+            </Text>
           </Text>
         </View>
-        <View style={styles.spacer} />
+        <View style={styles.bottomSpacing} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -198,19 +234,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginTop: verticalScale(10),
     marginBottom: verticalScale(20),
   },
-  alreadyHaveAccount: {
-    alignItems: 'center',
-    marginBottom: verticalScale(20),
-  },
-  alreadyHaveAccountText: {
-    fontSize: moderateScale(14),
-    fontWeight: '400',
-    color: theme.colors.grey3,
-  },
-  alreadyHaveAccountLink: {
-    color: theme.colors.primary,
-    fontWeight: '500',
-  },
   orText: {
     textAlign: 'center',
     fontSize: moderateScale(16),
@@ -218,6 +241,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.colors.grey3,
   },
   buttonContainer: {
+    marginTop: verticalScale(10),
     gap: verticalScale(14),
   },
   appleButton: {
@@ -230,18 +254,38 @@ const useStyles = makeStyles((theme: Theme) => ({
   icon: {
     marginRight: moderateScale(10),
   },
-  privacyPolicyContainer: {
+  checkboxWrapper: {
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    gap: 10,
+  },
+  alreadyHaveAccount: {
     alignItems: 'center',
     marginTop: verticalScale(20),
   },
+  alreadyHaveAccountText: {
+    fontSize: moderateScale(14),
+    fontWeight: '400',
+    color: theme.colors.grey3,
+  },
+  alreadyHaveAccountLink: {
+    color: theme.colors.primary,
+    fontWeight: '500',
+  },
+  privacyPolicyContainer: {
+    padding: 0,
+    margin: 0,
+  },
   privacyPolicy: {
-    textAlign: 'center',
     fontSize: moderateScale(16),
     fontWeight: '400',
     color: theme.colors.grey1,
   },
   privacyPolicyLink: {
+    fontWeight: '500',
     color: theme.colors.primary,
   },
-  spacer: { height: verticalScale(40) },
+  bottomSpacing: {
+    height: 40,
+  },
 }));

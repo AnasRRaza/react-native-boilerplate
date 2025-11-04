@@ -1,6 +1,6 @@
 import React from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -12,40 +12,52 @@ import * as Yup from 'yup';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import { COLORS } from '@/constants/colors';
-import { AuthStackNavigatorParamList } from '@/types/routes';
-import { forgotPasswordValidationSchema } from '@/utils/validationSchema';
+import { useForgotPassword } from '@/hooks/auth';
+import { OTP_TYPE } from '@/types/common';
+import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
+import { useToastNotification } from '@/utils';
+import { forgotPasswordSchema } from '@/utils/validationSchemas';
 
-type TForgotPasswordForm = Yup.InferType<typeof forgotPasswordValidationSchema>;
+type TForgotPasswordForm = Yup.InferType<typeof forgotPasswordSchema>;
 
 const ForgotPassword = () => {
-  const styles = useStyles();
-
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<TForgotPasswordForm>({
     mode: 'onSubmit',
-    resolver: yupResolver(forgotPasswordValidationSchema),
+    resolver: yupResolver(forgotPasswordSchema),
     defaultValues: {
       email: '',
     },
   });
 
+  const styles = useStyles();
+  const toast = useToastNotification();
   const navigation =
     useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
 
   const onSubmit: SubmitHandler<TForgotPasswordForm> = data => {
-    console.log(data);
-    // TODO: Forgot Password API call
+    forgotPassword(data, {
+      onSuccess: _data => {
+        toast(_data.message, 'success');
+        navigation.navigate(AUTH_ROUTES.OTP, {
+          email: data.email,
+          otpType: OTP_TYPE.FORGOT_PASSWORD,
+        });
+      },
+      onError: error => {
+        toast(error.message, 'error');
+      },
+    });
   };
 
   const handleBackToLogin = () => navigation.goBack();
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <View style={styles.container}>
       <Text style={styles.title}>Forgot Password</Text>
       <Text style={styles.description}>
         Please enter your email to recover your password.
@@ -70,14 +82,14 @@ const ForgotPassword = () => {
       <View style={styles.buttonContainer}>
         <Button
           title="Get Verification Code"
-          isShadow
           onPress={handleSubmit(onSubmit)}
+          loading={isPending}
         />
       </View>
       <Text style={styles.backToLogin} onPress={handleBackToLogin}>
         Back to Login
       </Text>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -108,7 +120,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   backToLogin: {
     marginTop: verticalScale(24),
     fontSize: moderateScale(16),
-    fontWeight: '400',
+    fontWeight: '500',
     color: theme.colors.primary,
     textAlign: 'center',
   },
