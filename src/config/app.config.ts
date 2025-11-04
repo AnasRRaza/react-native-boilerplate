@@ -4,7 +4,6 @@ import {
   APP_VERSION,
   ENABLE_APPLE_SIGNIN,
   ENABLE_GOOGLE_SIGNIN,
-  ENABLE_GUEST_MODE,
   GOOGLE_IOS_CLIENT_ID,
   GOOGLE_WEB_CLIENT_ID,
 } from '@env';
@@ -21,7 +20,6 @@ export const Config = {
   // Feature Flags
   ENABLE_GOOGLE_SIGNIN: stringToBoolean(ENABLE_GOOGLE_SIGNIN),
   ENABLE_APPLE_SIGNIN: stringToBoolean(ENABLE_APPLE_SIGNIN),
-  ENABLE_GUEST_MODE: stringToBoolean(ENABLE_GUEST_MODE),
 
   // Social Auth Configuration
   GOOGLE_WEB_CLIENT_ID: GOOGLE_WEB_CLIENT_ID || '',

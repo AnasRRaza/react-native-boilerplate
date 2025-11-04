@@ -25,8 +25,6 @@ export const useUploadMedia = () => {
         uri: ensureScheme(data.file.uri || '') || 'image.jpg',
       };
 
-      console.log('file', file);
-
       const formData = new FormData();
       formData.append('file', file);
 

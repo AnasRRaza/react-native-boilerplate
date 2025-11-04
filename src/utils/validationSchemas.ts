@@ -133,19 +133,6 @@ export const profileOnboardingSchema = Yup.object().shape({
 });
 
 /**
- * Privacy Onboarding Schema
- */
-export const privacyOnboardingSchema = Yup.object().shape({
-  interests: Yup.array()
-    .of(Yup.string())
-    .min(1, 'Please select at least one interest')
-    .required('Please select at least one interest'),
-  privacyMode: Yup.string()
-    .oneOf(['public', 'private'], 'Please select a privacy mode')
-    .required('Privacy mode is required'),
-});
-
-/**
  * Password Requirements Helper
  */
 export const passwordRequirements = [

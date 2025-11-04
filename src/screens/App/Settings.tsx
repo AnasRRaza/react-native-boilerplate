@@ -36,10 +36,7 @@ const Settings = () => {
       </Text>
 
       {settingsOptions.map((option, index) => (
-        <ListItem
-          key={index}
-          bottomDivider
-          onPress={() => console.log(option.title)}>
+        <ListItem key={index} bottomDivider onPress={() => {}}>
           <Icon name={option.icon} type={option.iconType} />
           <ListItem.Content>
             <ListItem.Title>{option.title}</ListItem.Title>

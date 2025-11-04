@@ -5,6 +5,7 @@
  * @format
  */
 
+import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from 'react-native-toast-notifications';
@@ -30,13 +31,14 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+function App(): React.JSX.Element {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
           <SafeAreaProvider>
             <ToastProvider>
+              <StatusBar />
               <AppNavigationContainer />
             </ToastProvider>
           </SafeAreaProvider>

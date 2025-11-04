@@ -50,6 +50,6 @@ const useStyles = makeStyles(theme => ({
   title: {
     color: theme.colors.black,
     fontSize: moderateScale(20),
-    fontFamily: FONTS.OUTFIT,
+    fontFamily: FONTS.INTER,
   },
 }));

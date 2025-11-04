@@ -1,34 +1,100 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Theme } from '@rneui/base';
 import { makeStyles, Text } from '@rneui/themed';
 
 import Button from '@/components/Button';
 import { COLORS } from '@/constants/colors';
 import { INTERESTS, PRIVACY_SETTINGS } from '@/constants/onboarding';
-import { AuthStackNavigatorParamList } from '@/types/routes';
+import { useUpdateProfile } from '@/hooks/auth';
+import { useUploadMedia } from '@/hooks/auth/useUploadMedia';
+import { useAuthStore } from '@/store/authStore';
+import {
+  ONBOARDING_ROUTES,
+  OnboardingStackNavigatorParamList,
+  StacksNavigationProp,
+} from '@/types/routes';
+import { useToastNotification } from '@/utils';
 
-const Privacy = () => {
+interface Props
+  extends NativeStackScreenProps<
+    OnboardingStackNavigatorParamList,
+    ONBOARDING_ROUTES.PRIVACY
+  > {}
+
+const Privacy: React.FC<Props> = ({ route }) => {
+  const { profileData } = route.params;
+  const { fullName, age, country, preferredLanguage, profileImage } =
+    profileData;
   const [interests, setInterests] = useState<string[]>([]);
-  const [privacySettings, setPrivacySettings] = useState<string>('');
+  const [privacyMode, setPrivacyMode] = useState('');
 
   const styles = useStyles();
-  const navigation =
-    useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
+  const { setUser, user } = useAuthStore();
+  const navigation = useNavigation<StacksNavigationProp>();
+  const toast = useToastNotification();
+  const { mutate: updateProfile, isPending } = useUpdateProfile();
+  const { mutate: uploadMedia, isPending: isUploadingMedia } = useUploadMedia();
 
-  const handleInterests = (interest: string) => {
-    setInterests(prev => [...prev, interest]);
-  };
+  const handleInterests = useCallback((interest: string) => {
+    setInterests((prev: string[]) => {
+      const isSelected = prev.includes(interest);
+      if (isSelected) {
+        return prev.filter(item => item !== interest);
+      }
 
-  const handlePrivacySettings = (privacy: string) => {
-    setPrivacySettings(privacy);
-  };
+      return [...prev, interest];
+    });
+  }, []);
+
+  const handlePrivacySettings = useCallback((privacy: string) => {
+    setPrivacyMode(privacy);
+  }, []);
 
   const onSubmit = () => {
-    // TODO: Privacy API call
+    if (profileImage) {
+      uploadMedia(
+        { file: profileImage },
+        {
+          onSuccess: _response => {
+            if (_response.data) {
+              updateProfile(
+                {
+                  fullName,
+                  age: Number(age),
+                  country,
+                  preferredLanguage,
+                  interests,
+                  privacyMode,
+                  profilePicture: _response.data?.key,
+                },
+                {
+                  onSuccess: async response => {
+                    if (response.data) {
+                      await setUser({
+                        ...user,
+                        ...response.data,
+                      });
+                      toast(response.message, 'success');
+                    }
+                  },
+                  onError: error => {
+                    toast(error.message, 'error');
+                  },
+                },
+              );
+            }
+          },
+          onError: error => {
+            toast(error.message, 'error');
+          },
+        },
+      );
+    }
   };
 
   return (
@@ -85,12 +151,12 @@ const Privacy = () => {
             key={privacy.value}
             style={[
               styles.privacySettingContainer,
-              privacySettings === privacy.value &&
+              privacyMode === privacy.value &&
                 styles.selectedPrivacySettingContainer,
             ]}
             onPress={() => handlePrivacySettings(privacy.value)}>
             <View style={styles.radioButton}>
-              {privacySettings === privacy.value && (
+              {privacyMode === privacy.value && (
                 <View style={styles.radioButtonInner} />
               )}
             </View>
@@ -104,7 +170,11 @@ const Privacy = () => {
         ))}
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="Continue" onPress={onSubmit} />
+        <Button
+          title="Continue"
+          onPress={onSubmit}
+          loading={isPending || isUploadingMedia}
+        />
       </View>
       <View style={styles.privacyPolicyContainer}>
         <Text style={styles.privacyPolicy}>

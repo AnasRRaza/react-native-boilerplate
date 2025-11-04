@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
-  Alert,
-  PermissionsAndroid,
-  Platform,
+  KeyboardTypeOptions,
   ScrollView,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { launchImageLibrary, MediaType } from 'react-native-image-picker';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -22,78 +19,65 @@ import Dropdown from '@/components/Dropdown';
 import Input from '@/components/Input';
 import { COLORS } from '@/constants/colors';
 import { PROFILE_FORM_FIELDS } from '@/constants/onboarding';
-import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
-import { profileValidationSchema } from '@/utils/validationSchema';
+import { Country, Language } from '@/types/common';
+import {
+  ONBOARDING_ROUTES,
+  OnboardingStackNavigatorParamList,
+} from '@/types/routes';
+import { pickImage } from '@/utils';
+import { profileOnboardingSchema } from '@/utils/validationSchemas';
 
-type TProfileForm = Yup.InferType<typeof profileValidationSchema>;
+type TProfileForm = Yup.InferType<typeof profileOnboardingSchema>;
 
 const Profile = () => {
-  const [profileImage, setProfileImage] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<TProfileForm>({
     mode: 'onSubmit',
-    resolver: yupResolver(profileValidationSchema),
+    resolver: yupResolver(profileOnboardingSchema),
     defaultValues: {
       fullName: '',
       age: '',
-      country: '',
-      language: '',
+      country: Country.UnitedStates,
+      language: Language.English,
     },
   });
+
   const styles = useStyles();
   const navigation =
-    useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
+    useNavigation<NavigationProp<OnboardingStackNavigatorParamList>>();
+
+  const profileImage = watch('profileImage');
 
   const onSubmit: SubmitHandler<TProfileForm> = data => {
-    console.log(data);
-    // TODO: Profile API call
-    navigation.navigate(AUTH_ROUTES.PRIVACY);
-  };
-
-  const requestGalleryPermission = async () => {
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES ||
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        {
-          title: 'Gallery Permission',
-          message: 'App needs access to your gallery',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    }
-
-    return true;
+    navigation.navigate(ONBOARDING_ROUTES.PRIVACY, {
+      profileData: {
+        fullName: data.fullName,
+        age: data.age,
+        country: data.country,
+        preferredLanguage: data.language,
+        profileImage: data.profileImage,
+      },
+    });
   };
 
   const handleImagePicker = async () => {
-    const granted = await requestGalleryPermission();
-    if (!granted) {
-      Alert.alert(
-        'Permission denied',
-        'Please grant permission to access your gallery',
-      );
-    }
-
-    const result = await launchImageLibrary({
-      mediaType: 'photo' as MediaType,
-      quality: 0.8,
-      includeBase64: true,
-      selectionLimit: 1,
-      includeExtra: true,
-    });
-
-    if (result?.assets && result.assets.length > 0) {
-      setProfileImage(result.assets[0].uri || null);
+    const result = await pickImage();
+    if (result) {
+      setValue('profileImage', result, { shouldValidate: true });
     }
   };
+
+  const handleAgeChange = useCallback((text: string) => {
+    // Remove any non-numeric characters and decimal points
+    const numericText = text.replace(/[^0-9]/g, '');
+
+    return numericText;
+  }, []);
 
   return (
     <ScrollView
@@ -108,11 +92,7 @@ const Profile = () => {
           style={styles.backIcon}
           onPress={() => navigation.goBack()}
         />
-        <Text
-          style={styles.step}
-          onPress={() => navigation.navigate(AUTH_ROUTES.PRIVACY)}>
-          Step 1
-        </Text>
+        <Text style={styles.step}>Step 1</Text>
       </View>
       <Text style={styles.title}>Set up your profile</Text>
       <Text style={styles.description}>
@@ -123,7 +103,7 @@ const Profile = () => {
         onPress={handleImagePicker}>
         {profileImage ? (
           <Image
-            source={{ uri: profileImage }}
+            source={{ uri: profileImage.uri }}
             style={styles.imagePickerImage}
             containerStyle={styles.imagePickerContainer}
           />
@@ -138,11 +118,14 @@ const Profile = () => {
         />
       </TouchableOpacity>
       <Text style={styles.imagePickerText}>Upload Profile Image</Text>
+      {errors.profileImage && (
+        <Text style={styles.imageError}>{errors.profileImage.message}</Text>
+      )}
       {PROFILE_FORM_FIELDS.map(_field => (
         <Controller
           key={_field.name}
           control={control}
-          name={_field.name as keyof TProfileForm}
+          name={_field.name as keyof Omit<TProfileForm, 'profileImage'>}
           render={({ field }) => {
             return _field.isDropdown ? (
               <Dropdown
@@ -167,7 +150,12 @@ const Profile = () => {
                 key={field.name}
                 label={_field.label}
                 placeholder={_field.placeholder}
-                onChangeText={field.onChange}
+                onChangeText={
+                  _field.name === 'age'
+                    ? text => field.onChange(handleAgeChange(text))
+                    : field.onChange
+                }
+                keyboardType={_field.keyboardType as KeyboardTypeOptions}
                 errorMessage={errors?.[field.name]?.message}
                 autoCapitalize="none"
                 leftIcon={
@@ -186,6 +174,7 @@ const Profile = () => {
       <View style={styles.buttonContainer}>
         <Button title="Continue" onPress={handleSubmit(onSubmit)} />
       </View>
+      <View style={styles.bottomSpacer} />
     </ScrollView>
   );
 };
@@ -268,12 +257,21 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.colors.primary,
     marginTop: verticalScale(10),
     textAlign: 'center',
-    marginBottom: verticalScale(20),
+  },
+  imageError: {
+    fontSize: moderateScale(14),
+    fontWeight: '400',
+    color: theme.colors.error,
+    marginTop: verticalScale(10),
+    textAlign: 'center',
   },
   buttonContainer: {
     marginTop: verticalScale(10),
   },
   leftIcon: {
     marginRight: moderateScale(10),
+  },
+  bottomSpacer: {
+    height: verticalScale(40),
   },
 }));

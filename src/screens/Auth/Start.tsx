@@ -52,19 +52,6 @@ const Start: React.FC = () => {
           titleStyle={styles.signInButtonText}
         />
 
-        {Config.ENABLE_GUEST_MODE && (
-          <Button
-            title="Continue as Guest"
-            onPress={() => {
-              // Handle guest mode
-              // You can implement guest signup here
-            }}
-            type="outline"
-            buttonStyle={styles.guestButton}
-            titleStyle={styles.guestButtonText}
-          />
-        )}
-
         <Text style={styles.termsText}>
           By continuing, you agree to our{'\n'}
           <Text style={styles.termsLink}>Terms of Service</Text> and{' '}

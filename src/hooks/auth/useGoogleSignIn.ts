@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 import { apiClient, AUTH_ENDPOINTS } from '@/api';
-import { ApiResponse, AuthResponse, GoogleSignInPayload } from '@/models';
+import { ApiResponse, GoogleSignInPayload, User } from '@/models';
 
 /**
  * Google Sign-In Hook
@@ -11,12 +11,11 @@ import { ApiResponse, AuthResponse, GoogleSignInPayload } from '@/models';
 export const useGoogleSignIn = () => {
   return useMutation({
     mutationFn: async (payload: GoogleSignInPayload) => {
-      const response = await apiClient.post<ApiResponse<AuthResponse>>(
-        AUTH_ENDPOINTS.GOOGLE_SIGNIN,
-        payload,
-      );
+      const response = await apiClient.post<
+        ApiResponse<User & { token: string }>
+      >(AUTH_ENDPOINTS.GOOGLE_SIGNIN, payload);
 
-      return response.data.data;
+      return response.data;
     },
   });
 };
