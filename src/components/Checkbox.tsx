@@ -8,9 +8,8 @@ import {
   CheckBoxProps,
   makeStyles,
   Text,
+  useTheme,
 } from '@rneui/themed';
-
-import { COLORS } from '@/constants/colors';
 
 interface Props extends Omit<CheckBoxProps, 'children'> {
   name: string;
@@ -28,6 +27,7 @@ const Checkbox: React.FC<Props> = ({
   ...props
 }) => {
   const styles = useStyles();
+  const { theme } = useTheme();
 
   return (
     <>
@@ -38,10 +38,14 @@ const Checkbox: React.FC<Props> = ({
         containerStyle={containerStyle}
         wrapperStyle={wrapperStyle}
         checkedIcon={
-          <Icon name="checkbox-outline" size={22} color={COLORS.primary} />
+          <Icon
+            name="checkbox-outline"
+            size={22}
+            color={theme.colors.primary}
+          />
         }
         uncheckedIcon={
-          <Icon name="square-outline" size={22} color={COLORS.primary} />
+          <Icon name="square-outline" size={22} color={theme.colors.primary} />
         }
         {...props}
       />

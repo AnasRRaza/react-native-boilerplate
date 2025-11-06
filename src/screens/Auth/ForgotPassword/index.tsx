@@ -6,12 +6,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Theme } from '@rneui/base';
-import { makeStyles, Text } from '@rneui/themed';
+import { makeStyles, Text, useTheme } from '@rneui/themed';
 import * as Yup from 'yup';
 
 import Button from '@/components/Button';
 import Input from '@/components/Input';
-import { COLORS } from '@/constants/colors';
 import { useForgotPassword } from '@/hooks/auth';
 import { OTP_TYPE } from '@/types/common';
 import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
@@ -35,6 +34,7 @@ const ForgotPassword = () => {
 
   const styles = useStyles();
   const toast = useToastNotification();
+  const { theme } = useTheme();
   const navigation =
     useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
   const { mutate: forgotPassword, isPending } = useForgotPassword();
@@ -73,7 +73,11 @@ const ForgotPassword = () => {
             errorMessage={errors?.[field.name]?.message}
             autoCapitalize="none"
             leftIcon={
-              <Icon name={'mail-outline'} size={22} color={COLORS.primary} />
+              <Icon
+                name={'mail-outline'}
+                size={22}
+                color={theme.colors.primary}
+              />
             }
             {...field}
           />

@@ -1,102 +1,229 @@
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Avatar, Button, Text } from '@rneui/themed';
+import React, { useCallback, useMemo } from 'react';
+import { ScrollView, View } from 'react-native';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
+import IonicIcon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { Theme } from '@rneui/base';
+import {
+  Avatar,
+  Icon,
+  ListItem,
+  makeStyles,
+  Switch,
+  Text,
+  useTheme,
+} from '@rneui/themed';
 
+import Button from '@/components/Button';
+import Dropdown from '@/components/Dropdown';
+import { LANGUAGES } from '@/constants/onboarding';
 import { useAuthStore } from '@/store/authStore';
+import { useThemeStore } from '@/store/themeStore';
+import { Language } from '@/types/common';
+import { APP_ROUTES } from '@/types/routes';
 
 const Profile = () => {
-  const { user, logout } = useAuthStore();
+  const { user, setUser, logout } = useAuthStore();
+  const { mode: themeMode, toggleMode } = useThemeStore();
+  const navigation = useNavigation();
+  const styles = useStyles();
+  const { theme } = useTheme();
+
+  // Menu items for Account Settings
+  const accountMenuItems = useMemo(
+    () => [
+      {
+        title: 'Edit Profile',
+        icon: 'person-outline',
+        navigateTo: APP_ROUTES.EDIT_PROFILE,
+      },
+      {
+        title: 'Change Password',
+        icon: 'lock-outline',
+        navigateTo: APP_ROUTES.CHANGE_PASSWORD,
+      },
+    ],
+    [navigation],
+  );
+
+  // Handle language change
+  const handleLanguageChange = useCallback(
+    (value: string) => {
+      if (!user) return;
+      const updatedUser = {
+        ...user,
+        preferredLanguage: value as Language,
+      };
+      setUser(updatedUser);
+    },
+    [user, setUser],
+  );
+
+  // Handle logout
+  const handleLogout = useCallback(() => {
+    logout();
+  }, [logout]);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}>
+      {/* Profile Header */}
       <View style={styles.header}>
         <Avatar
           size={100}
           rounded
-          title={user?.fullName?.charAt(0) || 'U'}
+          source={
+            user?.profilePicture?.path
+              ? { uri: user.profilePicture.path }
+              : undefined
+          }
+          title={
+            user?.profilePicture?.path
+              ? undefined
+              : user?.fullName?.charAt(0)?.toUpperCase() || 'U'
+          }
           containerStyle={styles.avatar}
+          imageProps={{
+            resizeMode: 'cover',
+          }}
         />
-        <Text h3 style={styles.name}>
-          {user?.fullName}
-        </Text>
-        <Text style={styles.email}>{user?.email || 'Anonymous User'}</Text>
+        <Text style={styles.name}>{user?.fullName || 'User'}</Text>
+        <Text style={styles.email}>{user?.email || 'email@example.com'}</Text>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.infoSection}>
-          <Text h4 style={styles.sectionTitle}>
-            Account Information
-          </Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>User ID:</Text>
-            <Text style={styles.infoValue}>{user?._id}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Onboarding Complete:</Text>
-            <Text style={styles.infoValue}>
-              {user?.isOnboarded ? 'Yes' : 'No'}
-            </Text>
-          </View>
-        </View>
+      {/* Account Settings Section */}
+      <Text style={styles.sectionTitle}>Account Settings</Text>
+      {accountMenuItems.map(item => (
+        <ListItem
+          key={item.navigateTo}
+          bottomDivider
+          onPress={() => navigation.navigate(item.navigateTo as never)}>
+          <Icon name={item.icon} type="ionicons" color={theme.colors.primary} />
+          <ListItem.Content>
+            <ListItem.Title>{item.title}</ListItem.Title>
+          </ListItem.Content>
+          <ListItem.Chevron />
+        </ListItem>
+      ))}
 
+      {/* App Settings Section */}
+      <Text style={styles.sectionTitle}>App Settings</Text>
+
+      {/* Dark Mode Toggle */}
+      <ListItem bottomDivider>
+        <IonicIcon
+          name={themeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
+          size={22}
+          color={theme.colors.primary}
+        />
+        <ListItem.Content>
+          <ListItem.Title>Dark Mode</ListItem.Title>
+        </ListItem.Content>
+        <Switch
+          value={themeMode === 'dark'}
+          onValueChange={toggleMode}
+          color={theme.colors.primary}
+        />
+      </ListItem>
+
+      {/* Language Section */}
+      <Text style={styles.sectionTitle}>Language</Text>
+      <View style={styles.dropdownContainer}>
+        <Dropdown
+          label="Language"
+          data={LANGUAGES}
+          value={user?.preferredLanguage || ''}
+          onChange={item => handleLanguageChange(item.value)}
+          labelField="label"
+          valueField="value"
+          placeholder="Select language"
+          renderLeftIcon={() => (
+            <IonicIcon
+              name="language-outline"
+              size={22}
+              color={theme.colors.primary}
+              style={styles.leftIcon}
+            />
+          )}
+        />
+      </View>
+
+      {/* Logout Button */}
+      <View style={styles.logoutButtonContainer}>
         <Button
           title="Logout"
-          onPress={logout}
-          containerStyle={styles.button}
+          onPress={handleLogout}
+          type="outline"
           buttonStyle={styles.logoutButton}
+          containerStyle={styles.logoutButtonWrapper}
         />
       </View>
+
+      <View style={styles.bottomSpacer} />
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
+export default Profile;
+
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  contentContainer: {
+    paddingBottom: verticalScale(40),
   },
   header: {
     alignItems: 'center',
-    padding: 30,
+    paddingVertical: verticalScale(30),
+    paddingHorizontal: moderateScale(20),
+    backgroundColor: theme.colors.background,
   },
   avatar: {
-    backgroundColor: '#A3B18A',
-    marginBottom: 15,
+    backgroundColor: theme.colors.primary,
+    marginBottom: verticalScale(15),
   },
   name: {
-    marginTop: 10,
+    fontSize: moderateScale(24),
+    fontWeight: '600',
+    color: theme.colors.foreground,
+    marginTop: verticalScale(10),
   },
   email: {
-    marginTop: 5,
-    opacity: 0.7,
-  },
-  content: {
-    padding: 20,
-  },
-  infoSection: {
-    marginBottom: 30,
+    fontSize: moderateScale(16),
+    fontWeight: '400',
+    color: theme.colors.grey2,
+    marginTop: verticalScale(5),
   },
   sectionTitle: {
-    marginBottom: 15,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  infoLabel: {
+    fontSize: moderateScale(18),
     fontWeight: '600',
+    color: theme.colors.foreground,
+    marginTop: verticalScale(20),
+    marginBottom: verticalScale(10),
+    paddingHorizontal: moderateScale(20),
   },
-  infoValue: {
-    opacity: 0.7,
+  dropdownContainer: {
+    paddingHorizontal: moderateScale(20),
+    marginBottom: verticalScale(10),
   },
-  button: {
-    marginTop: 20,
+  leftIcon: {
+    marginRight: moderateScale(10),
+  },
+  logoutButtonContainer: {
+    paddingHorizontal: moderateScale(20),
+    marginTop: verticalScale(30),
+  },
+  logoutButtonWrapper: {
+    borderBottomWidth: 0,
   },
   logoutButton: {
-    backgroundColor: '#ff190c',
+    borderColor: theme.colors.error,
   },
-});
-
-export default Profile;
+  bottomSpacer: {
+    height: verticalScale(40),
+  },
+}));

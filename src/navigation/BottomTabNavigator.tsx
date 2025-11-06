@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '@rneui/themed';
 
+import { Header } from '@/components';
 import Home from '@/screens/App/Home';
 import Profile from '@/screens/App/Profile';
 import Settings from '@/screens/App/Settings';
@@ -17,7 +18,9 @@ const BottomTabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerShown: false,
+        header(props) {
+          return <Header title={props?.options?.title || ''} />;
+        },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.grey3,
         tabBarStyle: {
@@ -37,19 +40,9 @@ const BottomTabNavigator = () => {
         name={BOTTOM_TAB_ROUTES.HOME}
         component={Home}
         options={{
-          tabBarLabel: 'Home',
+          title: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Icon name="home-outline" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name={BOTTOM_TAB_ROUTES.PROFILE}
-        component={Profile}
-        options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="person-outline" color={color} size={size} />
           ),
         }}
       />
@@ -57,9 +50,19 @@ const BottomTabNavigator = () => {
         name={BOTTOM_TAB_ROUTES.SETTINGS}
         component={Settings}
         options={{
-          tabBarLabel: 'Settings',
+          title: 'Settings',
           tabBarIcon: ({ color, size }) => (
             <Icon name="settings-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name={BOTTOM_TAB_ROUTES.PROFILE}
+        component={Profile}
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="person-outline" color={color} size={size} />
           ),
         }}
       />

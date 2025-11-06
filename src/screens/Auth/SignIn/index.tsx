@@ -12,7 +12,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Theme } from '@rneui/base';
-import { makeStyles, Text } from '@rneui/themed';
+import { makeStyles, Text, useTheme } from '@rneui/themed';
 import * as Yup from 'yup';
 
 import Button from '@/components/Button';
@@ -22,7 +22,6 @@ import {
   SIGNIN_FORM_FIELDS,
   TERMS_OF_SERVICE_URL,
 } from '@/constants/auth';
-import { COLORS } from '@/constants/colors';
 import { useLogin } from '@/hooks/auth';
 import { useAuthStore } from '@/store/authStore';
 import { OTP_TYPE } from '@/types/common';
@@ -52,6 +51,7 @@ const Login = () => {
   });
 
   const styles = useStyles();
+  const { theme } = useTheme();
   const navigation =
     useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
   const navigationStack = useNavigation<StacksNavigationProp>();
@@ -132,7 +132,7 @@ const Login = () => {
                   <Icon
                     name={_field.leftIcon}
                     size={22}
-                    color={COLORS.primary}
+                    color={theme.colors.primary}
                   />
                 }
                 {...field}
@@ -160,7 +160,7 @@ const Login = () => {
               <Icon
                 name="logo-google"
                 size={22}
-                color={COLORS.primary}
+                color={theme.colors.primary}
                 style={styles.icon}
               />
             }
@@ -176,7 +176,7 @@ const Login = () => {
                 <Icon
                   name="logo-apple"
                   size={22}
-                  color={COLORS.white}
+                  color={theme.colors.white}
                   style={styles.icon}
                 />
               }

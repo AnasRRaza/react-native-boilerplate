@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Text } from '@rneui/themed';
+import { Theme } from '@rneui/base';
+import { makeStyles, Text, useTheme } from '@rneui/themed';
 
 interface DrawerItemProps {
   title: string;
@@ -16,6 +17,9 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
   onPress,
   isActive = false,
 }) => {
+  const { theme } = useTheme();
+  const styles = useStyles();
+
   return (
     <TouchableOpacity
       style={[styles.container, isActive && styles.activeContainer]}
@@ -23,7 +27,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
       <Icon
         name={icon}
         size={24}
-        color={isActive ? '#A3B18A' : '#666'}
+        color={isActive ? theme.colors.primary : theme.colors.grey2}
         style={styles.icon}
       />
       <Text style={[styles.title, isActive && styles.activeTitle]}>
@@ -33,7 +37,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -44,19 +48,19 @@ const styles = StyleSheet.create({
     marginVertical: 3,
   },
   activeContainer: {
-    backgroundColor: '#A3B18A20',
+    backgroundColor: `${theme.colors.primary}20`,
   },
   icon: {
     marginRight: 15,
   },
   title: {
     fontSize: 16,
-    color: '#666',
+    color: theme.colors.grey2,
   },
   activeTitle: {
-    color: '#A3B18A',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
-});
+}));
 
 export default DrawerItem;

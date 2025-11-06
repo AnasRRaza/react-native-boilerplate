@@ -32,6 +32,8 @@ export enum ONBOARDING_ROUTES {
 export enum APP_ROUTES {
   DRAWER = 'drawer',
   HOME = 'home',
+  EDIT_PROFILE = 'EditProfile',
+  CHANGE_PASSWORD = 'ChangePassword',
   // Add more app routes here as needed
 }
 
@@ -92,6 +94,8 @@ export type BottomTabParamList = {
 // Main Stack Param List (within drawer)
 export type MainStackNavigatorParamList = {
   Dashboard: NavigatorScreenParams<BottomTabParamList>;
+  [APP_ROUTES.EDIT_PROFILE]: undefined;
+  [APP_ROUTES.CHANGE_PASSWORD]: undefined;
   // Add more main stack screens here
 };
 

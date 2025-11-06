@@ -1,10 +1,14 @@
 import * as React from 'react';
 import Svg, { ClipPath, Defs, G, Path, Rect, SvgProps } from 'react-native-svg';
 
-export const Logo: React.FC<SvgProps> = props => (
+interface LogoProps extends SvgProps {
+  color?: string;
+}
+
+export const Logo: React.FC<LogoProps> = ({ color = '#A3B18A', ...props }) => (
   <Svg width={75} height={73} viewBox="0 0 75 73" fill="none" {...props}>
     <G filter="url(#filter0_dd_96_293)">
-      <Rect x={15} y={5} width={45} height={43} rx={16} fill="#A3B18A" />
+      <Rect x={15} y={5} width={45} height={43} rx={16} fill={color} />
       <G clipPath="url(#clip0_96_293)">
         <G clipPath="url(#clip1_96_293)">
           <Path

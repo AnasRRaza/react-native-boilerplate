@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
 } from '@react-navigation/drawer';
-import { Avatar, Divider, Text } from '@rneui/themed';
+import { Theme } from '@rneui/base';
+import { Avatar, Divider, makeStyles, Text } from '@rneui/themed';
 
 import { useAuthStore } from '@/store/authStore';
 
@@ -12,6 +13,7 @@ import DrawerItem from './DrawerItem';
 
 const CustomDrawer = (props: DrawerContentComponentProps) => {
   const { user, logout } = useAuthStore();
+  const styles = useStyles();
 
   const menuItems = [
     { title: 'Dashboard', icon: 'home-outline', screen: 'Dashboard' },
@@ -62,37 +64,41 @@ const CustomDrawer = (props: DrawerContentComponentProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   profileSection: {
     alignItems: 'center',
     paddingVertical: 30,
     paddingHorizontal: 20,
+    backgroundColor: theme.colors.background,
   },
   avatar: {
-    backgroundColor: '#A3B18A',
+    backgroundColor: theme.colors.primary,
     marginBottom: 15,
   },
   name: {
     marginTop: 10,
     marginBottom: 5,
+    color: theme.colors.foreground,
   },
   email: {
     fontSize: 14,
-    opacity: 0.7,
+    color: theme.colors.grey2,
   },
   menuSection: {
     paddingVertical: 10,
   },
   divider: {
     marginVertical: 10,
+    backgroundColor: theme.colors.divider,
   },
   footer: {
     marginTop: 20,
     paddingBottom: 30,
   },
-});
+}));
 
 export default CustomDrawer;

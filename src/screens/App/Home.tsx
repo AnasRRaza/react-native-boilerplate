@@ -1,17 +1,20 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Text } from '@rneui/themed';
+import { ScrollView, View } from 'react-native';
+import { Theme } from '@rneui/base';
+import { makeStyles, Text } from '@rneui/themed';
 
 import { useAuthStore } from '@/store/authStore';
 
 const Home = () => {
   const user = useAuthStore(state => state.user);
+  const styles = useStyles();
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text h2>Welcome, {user?.fullName}!</Text>
-        <Text style={styles.subtitle}>Home Screen</Text>
+        <Text h2 style={styles.welcomeText}>
+          Welcome, {user?.fullName}!
+        </Text>
       </View>
 
       <View style={styles.content}>
@@ -20,12 +23,16 @@ const Home = () => {
         </Text>
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <Text h3>0</Text>
-            <Text>Projects</Text>
+            <Text h3 style={styles.statNumber}>
+              0
+            </Text>
+            <Text style={styles.statLabel}>Projects</Text>
           </View>
           <View style={styles.statCard}>
-            <Text h3>0</Text>
-            <Text>Tasks</Text>
+            <Text h3 style={styles.statNumber}>
+              0
+            </Text>
+            <Text style={styles.statLabel}>Tasks</Text>
           </View>
         </View>
 
@@ -38,16 +45,20 @@ const Home = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   header: {
     padding: 20,
   },
+  welcomeText: {
+    color: theme.colors.foreground,
+  },
   subtitle: {
     marginTop: 10,
-    opacity: 0.7,
+    color: theme.colors.grey2,
   },
   content: {
     padding: 20,
@@ -55,6 +66,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginTop: 20,
     marginBottom: 15,
+    color: theme.colors.foreground,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -64,16 +76,22 @@ const styles = StyleSheet.create({
   statCard: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.grey4,
     borderRadius: 12,
     flex: 1,
     marginHorizontal: 5,
   },
+  statNumber: {
+    color: theme.colors.foreground,
+  },
+  statLabel: {
+    color: theme.colors.grey2,
+  },
   emptyText: {
     textAlign: 'center',
-    opacity: 0.5,
+    color: theme.colors.grey2,
     marginVertical: 20,
   },
-});
+}));
 
 export default Home;

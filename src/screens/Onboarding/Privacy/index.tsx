@@ -5,10 +5,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Theme } from '@rneui/base';
-import { makeStyles, Text } from '@rneui/themed';
+import { makeStyles, Text, useTheme } from '@rneui/themed';
 
 import Button from '@/components/Button';
-import { COLORS } from '@/constants/colors';
 import { INTERESTS, PRIVACY_SETTINGS } from '@/constants/onboarding';
 import { useUpdateProfile } from '@/hooks/auth';
 import { useUploadMedia } from '@/hooks/auth/useUploadMedia';
@@ -34,6 +33,7 @@ const Privacy: React.FC<Props> = ({ route }) => {
   const [privacyMode, setPrivacyMode] = useState('');
 
   const styles = useStyles();
+  const { theme } = useTheme();
   const { setUser, user } = useAuthStore();
   const navigation = useNavigation<StacksNavigationProp>();
   const toast = useToastNotification();
@@ -106,7 +106,7 @@ const Privacy: React.FC<Props> = ({ route }) => {
         <Icon
           name="chevron-back-outline"
           size={32}
-          color={COLORS.black}
+          color={theme.colors.foreground}
           style={styles.backIcon}
           onPress={() => navigation.goBack()}
         />
@@ -137,9 +137,17 @@ const Privacy: React.FC<Props> = ({ route }) => {
               {interest.label}
             </Text>
             {interests.includes(interest.value) ? (
-              <Icon name="close-outline" size={18} color={COLORS.black} />
+              <Icon
+                name="close-outline"
+                size={18}
+                color={theme.colors.foreground}
+              />
             ) : (
-              <Icon name="add-outline" size={18} color={COLORS.black} />
+              <Icon
+                name="add-outline"
+                size={18}
+                color={theme.colors.foreground}
+              />
             )}
           </TouchableOpacity>
         ))}

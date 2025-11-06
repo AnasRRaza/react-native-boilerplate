@@ -1,17 +1,16 @@
 import React from 'react';
 import { ActivityIndicator, ActivityIndicatorProps, View } from 'react-native';
-import { makeStyles } from '@rneui/themed';
-
-import { COLORS } from '@/constants/colors';
+import { makeStyles, useTheme } from '@rneui/themed';
 
 interface Props extends ActivityIndicatorProps {}
 
 const LoadingSpinner: React.FC<Props> = ({ ...props }) => {
   const styles = useStyles();
+  const { theme } = useTheme();
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator color={COLORS.primary} {...props} />
+      <ActivityIndicator color={theme.colors.primary} {...props} />
     </View>
   );
 };

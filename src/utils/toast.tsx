@@ -1,7 +1,6 @@
 import { useToast } from 'react-native-toast-notifications';
 import Icon from 'react-native-vector-icons/Ionicons';
-
-import { COLORS } from '@/constants/colors';
+import { useTheme } from '@rneui/themed';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -11,13 +10,14 @@ export type ToastType = 'success' | 'error' | 'warning' | 'info';
  */
 export const useToastNotification = () => {
   const toast = useToast();
+  const { theme } = useTheme();
 
   const showToast = (message: string, type: 'success' | 'error') => {
     const icon =
       type === 'success' ? (
-        <Icon name="checkmark" size={18} color={COLORS.green} />
+        <Icon name="checkmark" size={18} color={theme.colors.success} />
       ) : (
-        <Icon name="close" size={18} color={COLORS.red} />
+        <Icon name="close" size={18} color={theme.colors.error} />
       );
 
     toast.show(message, {

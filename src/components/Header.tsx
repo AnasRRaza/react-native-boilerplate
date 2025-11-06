@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import Icon from 'react-native-vector-icons/Feather';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
-import { makeStyles, Text } from '@rneui/themed';
+import { makeStyles, Text, useTheme } from '@rneui/themed';
 
 import { FONTS } from '@/constants/fonts';
 
@@ -13,6 +13,7 @@ interface Props {
 }
 
 const Header: React.FC<Props> = ({ title, isBack = false }) => {
+  const { theme } = useTheme();
   const styles = useStyles();
 
   const renderHeader = () => {
@@ -28,9 +29,19 @@ const Header: React.FC<Props> = ({ title, isBack = false }) => {
   return (
     <View style={styles.container}>
       {isBack ? (
-        <Icon name="arrow-left" size={28} color={'#000'} onPress={handleBack} />
+        <Icon
+          name="arrow-left"
+          size={28}
+          color={theme.colors.foreground}
+          onPress={handleBack}
+        />
       ) : (
-        <Icon name="menu" size={28} color={'#000'} onPress={openDrawer} />
+        <Icon
+          name="menu"
+          size={28}
+          color={theme.colors.foreground}
+          onPress={openDrawer}
+        />
       )}
       {renderHeader()}
     </View>
@@ -48,7 +59,7 @@ const useStyles = makeStyles(theme => ({
     paddingHorizontal: moderateScale(12),
   },
   title: {
-    color: theme.colors.black,
+    color: theme.colors.foreground,
     fontSize: moderateScale(20),
     fontFamily: FONTS.INTER,
   },

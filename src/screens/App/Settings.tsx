@@ -1,8 +1,11 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { Icon, ListItem, Text } from '@rneui/themed';
+import { ScrollView } from 'react-native';
+import { Theme } from '@rneui/base';
+import { Icon, ListItem, makeStyles, Text } from '@rneui/themed';
 
 const Settings = () => {
+  const styles = useStyles();
+
   const settingsOptions = [
     { title: 'Account', icon: 'person-outline', iconType: 'ionicons' },
     {
@@ -48,13 +51,15 @@ const Settings = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   header: {
     padding: 20,
+    color: theme.colors.foreground,
   },
-});
+}));
 
 export default Settings;

@@ -133,6 +133,29 @@ export const profileOnboardingSchema = Yup.object().shape({
 });
 
 /**
+ * Profile Edit Schema
+ */
+export const profileEditSchema = Yup.object({
+  fullName: fullNameSchema,
+  email: emailSchema,
+  age: ageSchema,
+  country: Yup.string().required('Country is required'),
+  language: Yup.string().required('Language is required'),
+  profileImage: Yup.mixed<Asset>(),
+});
+
+/**
+ * Change Password Schema
+ */
+export const changePasswordSchema = Yup.object().shape({
+  currentPassword: Yup.string().required('Current password is required'),
+  newPassword: passwordSchema,
+  confirmNewPassword: Yup.string()
+    .required('Please confirm your new password')
+    .oneOf([Yup.ref('newPassword')], 'Passwords must match'),
+});
+
+/**
  * Password Requirements Helper
  */
 export const passwordRequirements = [

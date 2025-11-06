@@ -7,13 +7,12 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Theme } from '@rneui/base';
-import { makeStyles, Text } from '@rneui/themed';
+import { makeStyles, Text, useTheme } from '@rneui/themed';
 import * as Yup from 'yup';
 
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import { RESET_PASSWORD_FORM_FIELDS } from '@/constants/auth';
-import { COLORS } from '@/constants/colors';
 import { useResetPassword } from '@/hooks/auth';
 import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
 import { useToastNotification } from '@/utils';
@@ -45,6 +44,7 @@ const ResetPassword: React.FC<Props> = ({ route }) => {
 
   const styles = useStyles();
   const toast = useToastNotification();
+  const { theme } = useTheme();
   const { mutate: resetPassword, isPending } = useResetPassword();
   const navigation =
     useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
@@ -85,7 +85,11 @@ const ResetPassword: React.FC<Props> = ({ route }) => {
               errorMessage={errors?.[field.name]?.message}
               autoCapitalize="none"
               leftIcon={
-                <Icon name={_field.leftIcon} size={22} color={COLORS.primary} />
+                <Icon
+                  name={_field.leftIcon}
+                  size={22}
+                  color={theme.colors.primary}
+                />
               }
               {...field}
             />

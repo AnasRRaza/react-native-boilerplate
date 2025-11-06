@@ -6,10 +6,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Theme } from '@rneui/base';
-import { makeStyles, Text } from '@rneui/themed';
+import { makeStyles, Text, useTheme } from '@rneui/themed';
 
 import Button from '@/components/Button';
-import { COLORS } from '@/constants/colors';
 import { useResendOTP, useVerifyOTP } from '@/hooks/auth';
 import { useCounter } from '@/hooks/useCounter';
 import { OTP_TYPE } from '@/types/common';
@@ -27,6 +26,7 @@ const OTP: React.FC<Props> = ({ route }) => {
   const [otp, setOtp] = useState('');
 
   const styles = useStyles();
+  const { theme } = useTheme();
   const navigation =
     useNavigation<NavigationProp<AuthStackNavigatorParamList>>();
   const { mutate: verifyOTP, isPending } = useVerifyOTP();
@@ -84,7 +84,7 @@ const OTP: React.FC<Props> = ({ route }) => {
       <Icon
         name="chevron-back-outline"
         size={32}
-        color={COLORS.black}
+        color={theme.colors.foreground}
         style={styles.backIcon}
         onPress={() => navigation.goBack()}
       />
@@ -96,7 +96,7 @@ const OTP: React.FC<Props> = ({ route }) => {
       <Text style={styles.label}>6-digit OTP</Text>
       <OtpInput
         numberOfDigits={6}
-        focusColor={COLORS.primary}
+        focusColor={theme.colors.primary}
         focusStickBlinkingDuration={500}
         onTextChange={setOtp}
         textInputProps={{

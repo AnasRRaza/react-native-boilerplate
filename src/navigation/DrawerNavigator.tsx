@@ -13,14 +13,6 @@ const DrawerNavigator = () => {
     <Drawer.Navigator
       drawerContent={props => <CustomDrawer {...props} />}
       screenOptions={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: '#A3B18A',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: '600',
-        },
         drawerStyle: {
           width: '80%',
         },
@@ -30,7 +22,7 @@ const DrawerNavigator = () => {
         name={DRAWER_ROUTES.MAIN}
         component={MainStackNavigator}
         options={{
-          title: 'KickstartRN',
+          headerShown: false,
         }}
       />
       {/* Add more drawer screens here as needed */}

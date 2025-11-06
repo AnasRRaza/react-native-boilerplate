@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { Dropdown as RNEDropdown } from 'react-native-element-dropdown';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { Theme } from '@rneui/base';
-import { Icon, makeStyles, Text } from '@rneui/themed';
-
-import { COLORS } from '@/constants/colors';
+import { Icon, makeStyles, Text, useTheme } from '@rneui/themed';
 
 interface DropdownProps extends React.ComponentProps<typeof RNEDropdown> {
   label: string;
@@ -17,6 +15,7 @@ const Dropdown: React.FC<DropdownProps> = ({ ...props }) => {
   const [isFocused, setIsFocused] = useState(false);
 
   const styles = useStyles();
+  const { theme } = useTheme();
 
   return (
     <>
@@ -43,12 +42,12 @@ const Dropdown: React.FC<DropdownProps> = ({ ...props }) => {
             name={isFocused ? 'chevron-up' : 'chevron-down'}
             type="feather"
             size={20}
-            color={COLORS.primary}
+            color={theme.colors.primary}
           />
         )}
         containerStyle={styles.dropdownContainer}
         itemContainerStyle={styles.dropdownItemContainer}
-        activeColor={`${COLORS.primary}40`}
+        activeColor={`${theme.colors.primary}40`}
       />
       <Text style={styles.errorMessage}>{errorMessage}</Text>
     </>
