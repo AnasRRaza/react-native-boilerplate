@@ -5,7 +5,7 @@
  * @format
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -47,20 +47,18 @@ function App(): React.JSX.Element {
 
 // App content with theme integration
 function AppContent() {
-  const { mode: storedMode } = useThemeStore();
+  const { mode: storedMode, isInitialized } = useThemeStore();
   const { setMode, mode } = useThemeMode();
   const { theme: currentTheme } = useTheme();
-  const isSyncingRef = useRef(false);
 
-  // Sync theme mode from store
+  // Sync theme mode from store after rehydration and on every change
   useEffect(() => {
-    if (isSyncingRef.current) return;
-    isSyncingRef.current = true;
-    setMode(storedMode);
-    setTimeout(() => {
-      isSyncingRef.current = false;
-    }, 100);
-  }, [storedMode, setMode]);
+    if (!isInitialized) return; // Wait for rehydration to complete
+    if (mode !== storedMode) {
+      // Only sync if modes are different to prevent infinite loop
+      setMode(storedMode);
+    }
+  }, [isInitialized, storedMode, mode, setMode]);
 
   return (
     <SafeAreaProvider>

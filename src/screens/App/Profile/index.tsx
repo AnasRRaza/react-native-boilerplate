@@ -1,21 +1,14 @@
 import React, { useCallback, useMemo } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import IonicIcon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { Theme } from '@rneui/base';
-import {
-  Avatar,
-  Icon,
-  ListItem,
-  makeStyles,
-  Switch,
-  Text,
-  useTheme,
-} from '@rneui/themed';
+import { Avatar, makeStyles, Switch, Text, useTheme } from '@rneui/themed';
 
 import Button from '@/components/Button';
 import Dropdown from '@/components/Dropdown';
+import { FONTS } from '@/constants/fonts';
 import { LANGUAGES } from '@/constants/onboarding';
 import { useAuthStore } from '@/store/authStore';
 import { useThemeStore } from '@/store/themeStore';
@@ -39,11 +32,11 @@ const Profile = () => {
       },
       {
         title: 'Change Password',
-        icon: 'lock-outline',
+        icon: 'lock-closed-outline',
         navigateTo: APP_ROUTES.CHANGE_PASSWORD,
       },
     ],
-    [navigation],
+    [],
   );
 
   // Handle language change
@@ -96,37 +89,48 @@ const Profile = () => {
       {/* Account Settings Section */}
       <Text style={styles.sectionTitle}>Account Settings</Text>
       {accountMenuItems.map(item => (
-        <ListItem
+        <TouchableOpacity
           key={item.navigateTo}
-          bottomDivider
-          onPress={() => navigation.navigate(item.navigateTo as never)}>
-          <Icon name={item.icon} type="ionicons" color={theme.colors.primary} />
-          <ListItem.Content>
-            <ListItem.Title>{item.title}</ListItem.Title>
-          </ListItem.Content>
-          <ListItem.Chevron />
-        </ListItem>
+          style={styles.listItem}
+          onPress={() => navigation.navigate(item.navigateTo as never)}
+          activeOpacity={0.7}>
+          <IonicIcon
+            name={item.icon}
+            size={22}
+            color={theme.colors.primary}
+            style={styles.listItemIcon}
+          />
+          <View style={styles.listItemContent}>
+            <Text style={styles.listItemTitle}>{item.title}</Text>
+          </View>
+          <IonicIcon
+            name="chevron-forward"
+            size={20}
+            color={theme.colors.grey3}
+          />
+        </TouchableOpacity>
       ))}
 
       {/* App Settings Section */}
       <Text style={styles.sectionTitle}>App Settings</Text>
 
       {/* Dark Mode Toggle */}
-      <ListItem bottomDivider>
+      <View style={styles.listItem}>
         <IonicIcon
           name={themeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
           size={22}
           color={theme.colors.primary}
+          style={styles.listItemIcon}
         />
-        <ListItem.Content>
-          <ListItem.Title>Dark Mode</ListItem.Title>
-        </ListItem.Content>
+        <View style={styles.listItemContent}>
+          <Text style={styles.listItemTitle}>Dark Mode</Text>
+        </View>
         <Switch
           value={themeMode === 'dark'}
           onValueChange={toggleMode}
           color={theme.colors.primary}
         />
-      </ListItem>
+      </View>
 
       {/* Language Section */}
       <Text style={styles.sectionTitle}>Language</Text>
@@ -151,15 +155,12 @@ const Profile = () => {
       </View>
 
       {/* Logout Button */}
-      <View style={styles.logoutButtonContainer}>
-        <Button
-          title="Logout"
-          onPress={handleLogout}
-          type="outline"
-          buttonStyle={styles.logoutButton}
-          containerStyle={styles.logoutButtonWrapper}
-        />
-      </View>
+      <Button
+        title="Logout"
+        onPress={handleLogout}
+        type="outline"
+        buttonStyle={styles.logoutButton}
+      />
 
       <View style={styles.bottomSpacer} />
     </ScrollView>
@@ -172,6 +173,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    paddingHorizontal: theme.spacing.lg,
   },
   contentContainer: {
     paddingBottom: verticalScale(40),
@@ -204,22 +206,36 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.colors.foreground,
     marginTop: verticalScale(20),
     marginBottom: verticalScale(10),
-    paddingHorizontal: moderateScale(20),
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: verticalScale(16),
+    backgroundColor: theme.colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.grey4,
+  },
+  listItemIcon: {
+    marginRight: moderateScale(16),
+  },
+  listItemContent: {
+    flex: 1,
+  },
+  listItemTitle: {
+    fontFamily: FONTS.INTER,
+    fontSize: moderateScale(16),
+    fontWeight: '400',
+    color: theme.colors.foreground,
   },
   dropdownContainer: {
-    paddingHorizontal: moderateScale(20),
     marginBottom: verticalScale(10),
   },
   leftIcon: {
     marginRight: moderateScale(10),
   },
-  logoutButtonContainer: {
-    paddingHorizontal: moderateScale(20),
-    marginTop: verticalScale(30),
-  },
-  logoutButtonWrapper: {
-    borderBottomWidth: 0,
-  },
+  // logoutButtonContainer: {
+  //   marginTop: verticalScale(30),
+  // },
   logoutButton: {
     borderColor: theme.colors.error,
   },

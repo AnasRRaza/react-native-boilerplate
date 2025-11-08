@@ -20,5 +20,4 @@ export const theme = createTheme({
       },
     }),
   },
-  mode: 'light',
 });
