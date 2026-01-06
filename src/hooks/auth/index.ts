@@ -1,6 +1,7 @@
 export * from './useForgotPassword';
 export * from './useGoogleSignIn';
 export * from './useLogin';
+export * from './useLogout';
 export * from './useResendOTP';
 export * from './useResetPassword';
 export * from './useSignup';

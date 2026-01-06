@@ -6,6 +6,7 @@ import {
   ENABLE_GOOGLE_SIGNIN,
   GOOGLE_IOS_CLIENT_ID,
   GOOGLE_WEB_CLIENT_ID,
+  ONESIGNAL_APP_ID,
 } from '@env';
 
 // Convert string booleans to actual booleans
@@ -24,6 +25,9 @@ export const Config = {
   // Social Auth Configuration
   GOOGLE_WEB_CLIENT_ID: GOOGLE_WEB_CLIENT_ID || '',
   GOOGLE_IOS_CLIENT_ID: GOOGLE_IOS_CLIENT_ID || '',
+
+  // Push Notifications
+  ONESIGNAL_APP_ID: ONESIGNAL_APP_ID || '',
 
   // App Information
   APP_NAME: APP_NAME || 'KickstartRN',

@@ -1,4 +1,5 @@
 import { Country, Interest, Language } from '@/types/common';
+import { OneSignalSubscription } from '@/utils/onesignal';
 
 export enum Role {
   USER = 'user',
@@ -39,6 +40,7 @@ export interface User {
   };
   nameAlias?: string;
   age: number;
+  oneSignalSubscriptions: OneSignalSubscription[];
 }
 
 export interface AuthResponse {

@@ -8,11 +8,13 @@
 import { useEffect } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { LogLevel, OneSignal } from 'react-native-onesignal';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from 'react-native-toast-notifications';
 import { ThemeProvider, useTheme, useThemeMode } from '@rneui/themed';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import Config from '@/config/app.config';
 import AppNavigationContainer from '@/navigation/NavigationContainer';
 import { useThemeStore } from '@/store/themeStore';
 import { theme } from '@/theme';
@@ -32,6 +34,12 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Initialize OneSignal
+if (Config.ONESIGNAL_APP_ID) {
+  OneSignal.Debug.setLogLevel(LogLevel.Verbose);
+  OneSignal.initialize(Config.ONESIGNAL_APP_ID);
+}
 
 function App(): React.JSX.Element {
   return (
