@@ -7,7 +7,7 @@ import ForgotPassword from '@/screens/Auth/ForgotPassword';
 import OTP from '@/screens/Auth/OTP';
 import ResetPassword from '@/screens/Auth/ResetPassword';
 import SignIn from '@/screens/Auth/SignIn';
-import Signup from '@/screens/Auth/SignUp';
+import Signup from '@/screens/Auth/Signup';
 import Start from '@/screens/Auth/Start';
 import { AUTH_ROUTES, AuthStackNavigatorParamList } from '@/types/routes';
 
