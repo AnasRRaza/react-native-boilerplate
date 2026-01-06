@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Header } from '@/components';
 import ChangePassword from '@/screens/App/ChangePassword';
 import EditProfile from '@/screens/App/EditProfile';
+import Notifications from '@/screens/App/Notifications';
 import { APP_ROUTES, MainStackNavigatorParamList } from '@/types/routes';
 
 import BottomTabNavigator from './BottomTabNavigator';
@@ -35,6 +36,13 @@ const MainStackNavigator = () => {
         component={ChangePassword}
         options={{
           title: 'Change Password',
+        }}
+      />
+      <Stack.Screen
+        name={APP_ROUTES.NOTIFICATIONS}
+        component={Notifications}
+        options={{
+          title: 'Notifications',
         }}
       />
     </Stack.Navigator>

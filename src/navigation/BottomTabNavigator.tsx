@@ -1,19 +1,32 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '@rneui/themed';
 
 import { Header } from '@/components';
 import Home from '@/screens/App/Home';
 import Profile from '@/screens/App/Profile';
 import Settings from '@/screens/App/Settings';
-import { BOTTOM_TAB_ROUTES, BottomTabParamList } from '@/types/routes';
+import {
+  APP_ROUTES,
+  BOTTOM_TAB_ROUTES,
+  BottomTabParamList,
+  MainStackNavigatorParamList,
+} from '@/types/routes';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator = () => {
   const { theme } = useTheme();
+  const navigation =
+    useNavigation<StackNavigationProp<MainStackNavigatorParamList>>();
+
+  const handleNotificationPress = useCallback(() => {
+    navigation.navigate(APP_ROUTES.NOTIFICATIONS);
+  }, [navigation]);
 
   return (
     <Tab.Navigator
@@ -41,6 +54,13 @@ const BottomTabNavigator = () => {
         component={Home}
         options={{
           title: 'Home',
+          header: () => (
+            <Header
+              title="Home"
+              rightIcon="bell"
+              onRightIconPress={handleNotificationPress}
+            />
+          ),
           tabBarIcon: ({ color, size }) => (
             <Icon name="home-outline" color={color} size={size} />
           ),

@@ -34,6 +34,7 @@ export enum APP_ROUTES {
   HOME = 'home',
   EDIT_PROFILE = 'EditProfile',
   CHANGE_PASSWORD = 'ChangePassword',
+  NOTIFICATIONS = 'Notifications',
   // Add more app routes here as needed
 }
 
@@ -96,6 +97,7 @@ export type MainStackNavigatorParamList = {
   Dashboard: NavigatorScreenParams<BottomTabParamList>;
   [APP_ROUTES.EDIT_PROFILE]: undefined;
   [APP_ROUTES.CHANGE_PASSWORD]: undefined;
+  [APP_ROUTES.NOTIFICATIONS]: undefined;
   // Add more main stack screens here
 };
 

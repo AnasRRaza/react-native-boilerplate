@@ -58,3 +58,10 @@ export enum Interest {
   JOY = 'Joy',
   STRUGGLE = 'Struggle',
 }
+
+export enum ConnectionStatus {
+  PENDING = 'Pending',
+  ACCEPTED = 'Accepted',
+  REJECTED = 'Rejected',
+  CANCELLED = 'Cancelled',
+}
