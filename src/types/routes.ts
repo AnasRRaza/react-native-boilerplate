@@ -41,8 +41,8 @@ export enum APP_ROUTES {
 // Bottom tab routes
 export enum BOTTOM_TAB_ROUTES {
   HOME = 'home',
+  FEED = 'feed',
   PROFILE = 'profile',
-  SETTINGS = 'settings',
 }
 
 // Drawer routes
@@ -88,8 +88,8 @@ export type OnboardingStackNavigatorParamList = {
 // Bottom Tab Param List
 export type BottomTabParamList = {
   [BOTTOM_TAB_ROUTES.HOME]: undefined;
+  [BOTTOM_TAB_ROUTES.FEED]: undefined;
   [BOTTOM_TAB_ROUTES.PROFILE]: undefined;
-  [BOTTOM_TAB_ROUTES.SETTINGS]: undefined;
 };
 
 // Main Stack Param List (within drawer)

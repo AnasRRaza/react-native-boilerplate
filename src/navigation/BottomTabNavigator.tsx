@@ -7,9 +7,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '@rneui/themed';
 
 import { Header } from '@/components';
+import Feed from '@/screens/App/Feed';
 import Home from '@/screens/App/Home';
 import Profile from '@/screens/App/Profile';
-import Settings from '@/screens/App/Settings';
 import {
   APP_ROUTES,
   BOTTOM_TAB_ROUTES,
@@ -67,12 +67,13 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name={BOTTOM_TAB_ROUTES.SETTINGS}
-        component={Settings}
+        name={BOTTOM_TAB_ROUTES.FEED}
+        component={Feed}
         options={{
-          title: 'Settings',
+          title: 'Feed',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Icon name="settings-outline" color={color} size={size} />
+            <Icon name="newspaper-outline" color={color} size={size} />
           ),
         }}
       />
