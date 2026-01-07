@@ -7,6 +7,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '@rneui/themed';
 
 import { Header } from '@/components';
+import { ChatList } from '@/screens/App/Chat';
 import Feed from '@/screens/App/Feed';
 import Home from '@/screens/App/Home';
 import Profile from '@/screens/App/Profile';
@@ -74,6 +75,16 @@ const BottomTabNavigator = () => {
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon name="newspaper-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name={BOTTOM_TAB_ROUTES.CHAT}
+        component={ChatList}
+        options={{
+          title: 'Chat',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="chatbubbles-outline" color={color} size={size} />
           ),
         }}
       />

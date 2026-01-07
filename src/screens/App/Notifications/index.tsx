@@ -41,8 +41,6 @@ const Notifications = () => {
     },
   });
 
-  console.log('notifications', notifications);
-
   useEffect(() => {
     if (data) {
       setNotifications(data.pages.flatMap(page => page.notifications));

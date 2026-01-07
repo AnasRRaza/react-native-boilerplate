@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import { LoadingSpinner } from '@/components';
+import Config from '@/config/app.config';
 import { useAppState } from '@/hooks/useAppState';
 import { useAuthStore } from '@/store/authStore';
 import { useNotificationStore } from '@/store/notificationStore';
@@ -58,6 +59,11 @@ const AppNavigationContainer = () => {
 
   // Handle OneSignal push notification click
   useEffect(() => {
+    // Only set up listener if OneSignal is configured
+    if (!Config.ONESIGNAL_APP_ID) {
+      return;
+    }
+
     const handleNotificationClick = OneSignal.Notifications.addEventListener(
       'click',
       () => {

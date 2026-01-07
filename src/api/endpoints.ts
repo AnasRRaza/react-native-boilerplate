@@ -34,10 +34,17 @@ export const NOTIFICATION_ENDPOINTS = {
   NOTIFICATION_STREAM: '/notifications/stream',
 } as const;
 
+export const CHAT_ENDPOINTS = {
+  CONVERSATIONS: '/chat/last-conversations',
+  MESSAGES: '/chat/history',
+  OLDER_MESSAGES: '/messages/older',
+} as const;
+
 export const ENDPOINTS = {
   ...AUTH_ENDPOINTS,
   ...USER_ENDPOINTS,
   ...NOTIFICATION_ENDPOINTS,
+  ...CHAT_ENDPOINTS,
 } as const;
 
 export default ENDPOINTS;
