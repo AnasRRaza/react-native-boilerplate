@@ -42,6 +42,9 @@ export const CHAT_ENDPOINTS = {
 
 export const PAYMENT_ENDPOINTS = {
   PAYMENT_SHEET: '/payment/payment-sheet',
+  SETUP_INTENT: '/payment/setup-intent',
+  SUBSCRIBE_MOBILE: '/payment/subscribe-mobile',
+  SUBSCRIPTION_STATUS: '/payment/subscription-status',
 } as const;
 
 export const ENDPOINTS = {

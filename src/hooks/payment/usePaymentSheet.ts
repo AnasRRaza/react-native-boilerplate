@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { Alert } from 'react-native';
 import { useStripe } from '@stripe/stripe-react-native';
 
 import apiClient from '@/api/client';
@@ -9,6 +8,7 @@ import {
   PaymentSheetResponse,
   PaymentState,
 } from '@/types/payment';
+import { useToastNotification } from '@/utils/toast';
 
 const INITIAL_STATE: PaymentState = {
   status: 'idle',
@@ -19,6 +19,7 @@ const INITIAL_STATE: PaymentState = {
 export const usePaymentSheet = () => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [paymentState, setPaymentState] = useState<PaymentState>(INITIAL_STATE);
+  const showToast = useToastNotification();
 
   const fetchPaymentSheetParams = useCallback(
     async (
@@ -91,7 +92,7 @@ export const usePaymentSheet = () => {
 
   const openPaymentSheet = useCallback(async (): Promise<boolean> => {
     if (!paymentState.isPaymentSheetReady) {
-      Alert.alert('Error', 'Payment sheet is not ready');
+      showToast('Payment sheet is not ready', 'error');
 
       return false;
     }
@@ -106,7 +107,7 @@ export const usePaymentSheet = () => {
         status: 'error',
         error: error.message,
       }));
-      Alert.alert(`Error code: ${error.code}`, error.message);
+      showToast(error.message, 'error');
 
       return false;
     }
@@ -116,10 +117,10 @@ export const usePaymentSheet = () => {
       error: null,
       isPaymentSheetReady: false,
     });
-    Alert.alert('Success', 'Your payment was successful!');
+    showToast('Your payment was successful!', 'success');
 
     return true;
-  }, [paymentState.isPaymentSheetReady, presentPaymentSheet]);
+  }, [paymentState.isPaymentSheetReady, presentPaymentSheet, showToast]);
 
   const resetPaymentState = useCallback(() => {
     setPaymentState(INITIAL_STATE);

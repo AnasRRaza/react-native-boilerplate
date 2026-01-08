@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import IonicIcon from 'react-native-vector-icons/Ionicons';
@@ -7,27 +7,75 @@ import { makeStyles, Text, useTheme } from '@rneui/themed';
 
 import Button from '@/components/Button';
 import { FONTS } from '@/constants/fonts';
-import { usePaymentSheet } from '@/hooks/payment';
+import {
+  DEFAULT_CURRENCY,
+  MAX_PAYMENT_AMOUNT,
+  MIN_PAYMENT_AMOUNT,
+} from '@/constants/payment';
+import { usePaymentSheet, useSubscriptionSetup } from '@/hooks/payment';
+import { PaymentType, PlanInterval } from '@/types/payment';
 
 import PaymentAmountInput from './PaymentAmountInput';
+import PaymentTypeTabs from './PaymentTypeTabs';
+import SubscriptionPlans from './SubscriptionPlans';
 
 const DEFAULT_AMOUNT = 10;
-const MIN_AMOUNT = 1;
-const MAX_AMOUNT = 10000;
+const ERROR_BG_OPACITY = '15';
+const SUCCESS_BG_OPACITY = '15';
 
 const Payment = () => {
   const styles = useStyles();
   const { theme } = useTheme();
+
+  // Payment type state
+  const [paymentType, setPaymentType] = useState<PaymentType>('one-time');
+
+  // One-time payment state
   const [amount, setAmount] = useState<string>(DEFAULT_AMOUNT.toString());
   const {
     initializePaymentSheet,
     openPaymentSheet,
-    isLoading,
+    isLoading: isOneTimeLoading,
     isPaymentReady,
     paymentState,
     resetPaymentState,
   } = usePaymentSheet();
 
+  // Subscription state
+  const [selectedPlan, setSelectedPlan] = useState<PlanInterval>('monthly');
+  const {
+    initializeSetupSheet,
+    openSetupSheet,
+    createSubscription,
+    isLoading: isSubscriptionLoading,
+    isSetupReady,
+    subscriptionState,
+    resetSubscriptionState,
+  } = useSubscriptionSetup();
+
+  const isLoading = isOneTimeLoading || isSubscriptionLoading;
+  const currentError =
+    paymentType === 'one-time' ? paymentState.error : subscriptionState.error;
+  const isSuccess =
+    paymentType === 'one-time'
+      ? paymentState.status === 'success'
+      : subscriptionState.status === 'success';
+
+  const iconName = useMemo(() => {
+    return paymentType === 'one-time' ? 'card-outline' : 'repeat-outline';
+  }, [paymentType]);
+
+  // Handle payment type change
+  const handlePaymentTypeChange = useCallback(
+    (type: PaymentType) => {
+      setPaymentType(type);
+      resetPaymentState();
+      resetSubscriptionState();
+    },
+    [resetPaymentState, resetSubscriptionState],
+  );
+
+  // One-time payment handlers
   const handleAmountChange = useCallback(
     (value: string) => {
       const numericValue = value.replace(/[^0-9.]/g, '');
@@ -37,54 +85,105 @@ const Payment = () => {
     [resetPaymentState],
   );
 
-  const handleInitializePayment = useCallback(async () => {
+  const handleInitializeOneTimePayment = useCallback(async () => {
     const numericAmount = parseFloat(amount);
-
-    if (isNaN(numericAmount) || numericAmount < MIN_AMOUNT) {
+    if (isNaN(numericAmount) || numericAmount < MIN_PAYMENT_AMOUNT) {
       return;
     }
-
-    if (numericAmount > MAX_AMOUNT) {
+    if (numericAmount > MAX_PAYMENT_AMOUNT) {
       return;
     }
-
-    // Convert to cents for Stripe
     const amountInCents = Math.round(numericAmount * 100);
-    await initializePaymentSheet({ amount: amountInCents, currency: 'usd' });
+    await initializePaymentSheet({
+      amount: amountInCents,
+      currency: DEFAULT_CURRENCY,
+    });
   }, [amount, initializePaymentSheet]);
 
-  const handleProceedToPayment = useCallback(async () => {
+  const handleProceedOneTimePayment = useCallback(async () => {
     await openPaymentSheet();
   }, [openPaymentSheet]);
 
-  const getButtonTitle = useCallback(() => {
-    if (isLoading) {
-      return 'Processing...';
-    }
-    if (isPaymentReady) {
-      return 'Proceed to Pay';
-    }
+  // Subscription handlers
+  const handleSelectPlan = useCallback(
+    (plan: PlanInterval) => {
+      setSelectedPlan(plan);
+      resetSubscriptionState();
+    },
+    [resetSubscriptionState],
+  );
 
-    return 'Initialize Payment';
-  }, [isLoading, isPaymentReady]);
+  const handleInitializeSubscription = useCallback(async () => {
+    await initializeSetupSheet(selectedPlan);
+  }, [selectedPlan, initializeSetupSheet]);
 
-  const handleButtonPress = useCallback(() => {
-    if (isPaymentReady) {
-      handleProceedToPayment();
-    } else {
-      handleInitializePayment();
+  const handleProceedSubscription = useCallback(async () => {
+    const result = await openSetupSheet();
+    if (result) {
+      // SetupIntent completed, payment method saved to customer
+      // Now create the subscription using the saved payment method
+      await createSubscription(selectedPlan);
     }
-  }, [isPaymentReady, handleProceedToPayment, handleInitializePayment]);
+  }, [openSetupSheet, createSubscription, selectedPlan]);
 
-  const isValidAmount = useCallback(() => {
+  // Validation
+  const isValidOneTimeAmount = useCallback(() => {
     const numericAmount = parseFloat(amount);
 
     return (
       !isNaN(numericAmount) &&
-      numericAmount >= MIN_AMOUNT &&
-      numericAmount <= MAX_AMOUNT
+      numericAmount >= MIN_PAYMENT_AMOUNT &&
+      numericAmount <= MAX_PAYMENT_AMOUNT
     );
   }, [amount]);
+
+  // Button handlers
+  const getButtonTitle = useCallback(() => {
+    if (isLoading) {
+      return 'Processing...';
+    }
+
+    if (paymentType === 'one-time') {
+      return isPaymentReady ? 'Pay Now' : 'Initialize Payment';
+    }
+
+    return isSetupReady ? 'Subscribe Now' : 'Continue';
+  }, [isLoading, paymentType, isPaymentReady, isSetupReady]);
+
+  const handleButtonPress = useCallback(() => {
+    if (paymentType === 'one-time') {
+      if (isPaymentReady) {
+        handleProceedOneTimePayment();
+      } else {
+        handleInitializeOneTimePayment();
+      }
+    } else {
+      if (isSetupReady) {
+        handleProceedSubscription();
+      } else {
+        handleInitializeSubscription();
+      }
+    }
+  }, [
+    paymentType,
+    isPaymentReady,
+    isSetupReady,
+    handleProceedOneTimePayment,
+    handleInitializeOneTimePayment,
+    handleProceedSubscription,
+    handleInitializeSubscription,
+  ]);
+
+  const isButtonDisabled = useCallback(() => {
+    if (isLoading) {
+      return true;
+    }
+    if (paymentType === 'one-time' && !isValidOneTimeAmount()) {
+      return true;
+    }
+
+    return false;
+  }, [isLoading, paymentType, isValidOneTimeAmount]);
 
   return (
     <ScrollView
@@ -95,39 +194,56 @@ const Payment = () => {
       {/* Payment Icon Header */}
       <View style={styles.header}>
         <View style={styles.iconContainer}>
-          <IonicIcon
-            name="card-outline"
-            size={48}
-            color={theme.colors.primary}
-          />
+          <IonicIcon name={iconName} size={48} color={theme.colors.primary} />
         </View>
-        <Text style={styles.title}>Make a Payment</Text>
+        <Text style={styles.title}>
+          {paymentType === 'one-time' ? 'Make a Payment' : 'Subscribe'}
+        </Text>
         <Text style={styles.subtitle}>
-          Enter the amount you want to pay and proceed to checkout
+          {paymentType === 'one-time'
+            ? 'Enter the amount you want to pay'
+            : 'Choose a plan that works for you'}
         </Text>
       </View>
 
-      {/* Amount Input Section */}
-      <PaymentAmountInput
-        value={amount}
-        onChangeText={handleAmountChange}
-        minAmount={MIN_AMOUNT}
-        maxAmount={MAX_AMOUNT}
+      {/* Payment Type Tabs */}
+      <PaymentTypeTabs
+        selectedType={paymentType}
+        onSelectType={handlePaymentTypeChange}
       />
 
-      {/* Payment Status */}
-      {paymentState.error ? (
+      {/* One-time Payment Content */}
+      {paymentType === 'one-time' ? (
+        <PaymentAmountInput
+          value={amount}
+          onChangeText={handleAmountChange}
+          minAmount={MIN_PAYMENT_AMOUNT}
+          maxAmount={MAX_PAYMENT_AMOUNT}
+        />
+      ) : null}
+
+      {/* Subscription Content */}
+      {paymentType === 'subscription' ? (
+        <SubscriptionPlans
+          selectedPlan={selectedPlan}
+          onSelectPlan={handleSelectPlan}
+        />
+      ) : null}
+
+      {/* Error Message */}
+      {currentError ? (
         <View style={styles.errorContainer}>
           <IonicIcon
             name="alert-circle-outline"
             size={20}
             color={theme.colors.error}
           />
-          <Text style={styles.errorText}>{paymentState.error}</Text>
+          <Text style={styles.errorText}>{currentError}</Text>
         </View>
       ) : null}
 
-      {paymentState.status === 'success' ? (
+      {/* Success Message */}
+      {isSuccess ? (
         <View style={styles.successContainer}>
           <IonicIcon
             name="checkmark-circle-outline"
@@ -135,17 +251,19 @@ const Payment = () => {
             color={theme.colors.success}
           />
           <Text style={styles.successText}>
-            Payment completed successfully!
+            {paymentType === 'one-time'
+              ? 'Payment completed successfully!'
+              : 'Subscription activated successfully!'}
           </Text>
         </View>
       ) : null}
 
-      {/* Payment Button */}
+      {/* Action Button */}
       <Button
         title={getButtonTitle()}
         onPress={handleButtonPress}
         loading={isLoading}
-        disabled={isLoading || !isValidAmount()}
+        disabled={isButtonDisabled()}
         buttonStyle={styles.payButton}
         containerStyle={styles.buttonContainer}
       />
@@ -178,7 +296,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   header: {
     alignItems: 'center',
-    paddingVertical: verticalScale(30),
+    paddingVertical: verticalScale(24),
   },
   iconContainer: {
     width: moderateScale(80),
@@ -187,14 +305,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.colors.grey5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: verticalScale(16),
+    marginBottom: verticalScale(12),
   },
   title: {
     fontSize: moderateScale(24),
     fontWeight: '600',
     fontFamily: FONTS.INTER,
     color: theme.colors.foreground,
-    marginBottom: verticalScale(8),
+    marginBottom: verticalScale(6),
   },
   subtitle: {
     fontSize: moderateScale(14),
@@ -206,7 +324,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: `${theme.colors.error}15`,
+    backgroundColor: `${theme.colors.error}${ERROR_BG_OPACITY}`,
     padding: moderateScale(12),
     borderRadius: moderateScale(8),
     marginBottom: verticalScale(16),
@@ -221,7 +339,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   successContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: `${theme.colors.success}15`,
+    backgroundColor: `${theme.colors.success}${SUCCESS_BG_OPACITY}`,
     padding: moderateScale(12),
     borderRadius: moderateScale(8),
     marginBottom: verticalScale(16),
