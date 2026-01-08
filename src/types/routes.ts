@@ -37,6 +37,7 @@ export enum APP_ROUTES {
   NOTIFICATIONS = 'Notifications',
   CHAT_LIST = 'ChatList',
   CHAT_CONVERSATION = 'ChatConversation',
+  PAYMENT = 'Payment',
 }
 
 // Bottom tab routes
@@ -108,6 +109,7 @@ export type MainStackNavigatorParamList = {
     userName: string;
     userImage?: string | null;
   };
+  [APP_ROUTES.PAYMENT]: undefined;
 };
 
 // Drawer Param List

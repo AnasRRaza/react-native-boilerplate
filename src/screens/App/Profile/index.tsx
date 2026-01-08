@@ -35,6 +35,11 @@ const Profile = () => {
         icon: 'lock-closed-outline',
         navigateTo: APP_ROUTES.CHANGE_PASSWORD,
       },
+      {
+        title: 'Payment',
+        icon: 'card-outline',
+        navigateTo: APP_ROUTES.PAYMENT,
+      },
     ],
     [],
   );

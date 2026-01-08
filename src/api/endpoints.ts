@@ -40,11 +40,16 @@ export const CHAT_ENDPOINTS = {
   OLDER_MESSAGES: '/messages/older',
 } as const;
 
+export const PAYMENT_ENDPOINTS = {
+  PAYMENT_SHEET: '/payment/payment-sheet',
+} as const;
+
 export const ENDPOINTS = {
   ...AUTH_ENDPOINTS,
   ...USER_ENDPOINTS,
   ...NOTIFICATION_ENDPOINTS,
   ...CHAT_ENDPOINTS,
+  ...PAYMENT_ENDPOINTS,
 } as const;
 
 export default ENDPOINTS;

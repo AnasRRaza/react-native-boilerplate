@@ -7,4 +7,5 @@ declare module '@env' {
   export const ONESIGNAL_APP_ID: string;
   export const APP_NAME: string;
   export const APP_VERSION: string;
+  export const STRIPE_PUBLISHABLE_KEY: string;
 }

@@ -12,6 +12,7 @@ import { LogLevel, OneSignal } from 'react-native-onesignal';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from 'react-native-toast-notifications';
 import { ThemeProvider, useTheme, useThemeMode } from '@rneui/themed';
+import { StripeProvider } from '@stripe/stripe-react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import Config from '@/config/app.config';
@@ -70,13 +71,15 @@ function AppContent() {
 
   return (
     <SafeAreaProvider>
-      <ToastProvider>
-        <StatusBar
-          barStyle={mode === 'dark' ? 'light-content' : 'dark-content'}
-          backgroundColor={currentTheme.colors.background}
-        />
-        <AppNavigationContainer />
-      </ToastProvider>
+      <StripeProvider publishableKey={Config.STRIPE_PUBLISHABLE_KEY}>
+        <ToastProvider>
+          <StatusBar
+            barStyle={mode === 'dark' ? 'light-content' : 'dark-content'}
+            backgroundColor={currentTheme.colors.background}
+          />
+          <AppNavigationContainer />
+        </ToastProvider>
+      </StripeProvider>
     </SafeAreaProvider>
   );
 }
