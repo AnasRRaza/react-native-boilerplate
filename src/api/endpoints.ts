@@ -34,10 +34,25 @@ export const NOTIFICATION_ENDPOINTS = {
   NOTIFICATION_STREAM: '/notifications/stream',
 } as const;
 
+export const CHAT_ENDPOINTS = {
+  CONVERSATIONS: '/chat/last-conversations',
+  MESSAGES: '/chat/history',
+  OLDER_MESSAGES: '/messages/older',
+} as const;
+
+export const PAYMENT_ENDPOINTS = {
+  PAYMENT_SHEET: '/payment/payment-sheet',
+  SETUP_INTENT: '/payment/setup-intent',
+  SUBSCRIBE_MOBILE: '/payment/subscribe-mobile',
+  SUBSCRIPTION_STATUS: '/payment/subscription-status',
+} as const;
+
 export const ENDPOINTS = {
   ...AUTH_ENDPOINTS,
   ...USER_ENDPOINTS,
   ...NOTIFICATION_ENDPOINTS,
+  ...CHAT_ENDPOINTS,
+  ...PAYMENT_ENDPOINTS,
 } as const;
 
 export default ENDPOINTS;

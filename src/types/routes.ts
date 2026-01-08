@@ -35,14 +35,17 @@ export enum APP_ROUTES {
   EDIT_PROFILE = 'EditProfile',
   CHANGE_PASSWORD = 'ChangePassword',
   NOTIFICATIONS = 'Notifications',
-  // Add more app routes here as needed
+  CHAT_LIST = 'ChatList',
+  CHAT_CONVERSATION = 'ChatConversation',
+  PAYMENT = 'Payment',
 }
 
 // Bottom tab routes
 export enum BOTTOM_TAB_ROUTES {
   HOME = 'home',
+  FEED = 'feed',
+  CHAT = 'chat',
   PROFILE = 'profile',
-  SETTINGS = 'settings',
 }
 
 // Drawer routes
@@ -88,8 +91,9 @@ export type OnboardingStackNavigatorParamList = {
 // Bottom Tab Param List
 export type BottomTabParamList = {
   [BOTTOM_TAB_ROUTES.HOME]: undefined;
+  [BOTTOM_TAB_ROUTES.FEED]: undefined;
+  [BOTTOM_TAB_ROUTES.CHAT]: undefined;
   [BOTTOM_TAB_ROUTES.PROFILE]: undefined;
-  [BOTTOM_TAB_ROUTES.SETTINGS]: undefined;
 };
 
 // Main Stack Param List (within drawer)
@@ -98,7 +102,14 @@ export type MainStackNavigatorParamList = {
   [APP_ROUTES.EDIT_PROFILE]: undefined;
   [APP_ROUTES.CHANGE_PASSWORD]: undefined;
   [APP_ROUTES.NOTIFICATIONS]: undefined;
-  // Add more main stack screens here
+  [APP_ROUTES.CHAT_LIST]: undefined;
+  [APP_ROUTES.CHAT_CONVERSATION]: {
+    conversationId: string;
+    otherUserId: string;
+    userName: string;
+    userImage?: string | null;
+  };
+  [APP_ROUTES.PAYMENT]: undefined;
 };
 
 // Drawer Param List

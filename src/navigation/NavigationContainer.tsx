@@ -1,17 +1,19 @@
 /* eslint-disable no-nested-ternary */
 import React, { useEffect } from 'react';
+import { OneSignal } from 'react-native-onesignal';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import { LoadingSpinner } from '@/components';
+import Config from '@/config/app.config';
 import { useAppState } from '@/hooks/useAppState';
 import { useAuthStore } from '@/store/authStore';
 import { useNotificationStore } from '@/store/notificationStore';
-import { RootStackParamList, STACKS } from '@/types/routes';
+import { APP_ROUTES, RootStackParamList, STACKS } from '@/types/routes';
 
 import AppNavigator from './AppNavigator';
 import AuthNavigator from './AuthNavigator';
-import { navigationRef } from './NavigationRef';
+import { navigate, navigationRef } from './NavigationRef';
 import OnboardingNavigator from './OnboardingNavigator';
 
 const RootStack = createStackNavigator<RootStackParamList>();
@@ -54,6 +56,29 @@ const AppNavigationContainer = () => {
     stopSSE,
     fetchUnreadNotifications,
   ]);
+
+  // Handle OneSignal push notification click
+  useEffect(() => {
+    // Only set up listener if OneSignal is configured
+    if (!Config.ONESIGNAL_APP_ID) {
+      return;
+    }
+
+    const handleNotificationClick = OneSignal.Notifications.addEventListener(
+      'click',
+      () => {
+        if (navigationRef.isReady()) {
+          navigate(STACKS.APP, {
+            screen: APP_ROUTES.NOTIFICATIONS,
+          });
+        }
+      },
+    );
+
+    return () => {
+      handleNotificationClick?.remove();
+    };
+  }, []);
 
   // Wait for auth store to rehydrate from AsyncStorage
   if (!isInitialized) {

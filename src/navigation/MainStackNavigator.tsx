@@ -3,8 +3,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { Header } from '@/components';
 import ChangePassword from '@/screens/App/ChangePassword';
+import { ChatConversation, ChatList } from '@/screens/App/Chat';
 import EditProfile from '@/screens/App/EditProfile';
 import Notifications from '@/screens/App/Notifications';
+import Payment from '@/screens/App/Payment';
 import { APP_ROUTES, MainStackNavigatorParamList } from '@/types/routes';
 
 import BottomTabNavigator from './BottomTabNavigator';
@@ -43,6 +45,27 @@ const MainStackNavigator = () => {
         component={Notifications}
         options={{
           title: 'Notifications',
+        }}
+      />
+      <Stack.Screen
+        name={APP_ROUTES.CHAT_LIST}
+        component={ChatList}
+        options={{
+          title: 'Messages',
+        }}
+      />
+      <Stack.Screen
+        name={APP_ROUTES.CHAT_CONVERSATION}
+        component={ChatConversation}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name={APP_ROUTES.PAYMENT}
+        component={Payment}
+        options={{
+          title: 'Payment',
         }}
       />
     </Stack.Navigator>

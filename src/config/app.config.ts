@@ -6,6 +6,8 @@ import {
   ENABLE_GOOGLE_SIGNIN,
   GOOGLE_IOS_CLIENT_ID,
   GOOGLE_WEB_CLIENT_ID,
+  ONESIGNAL_APP_ID,
+  STRIPE_PUBLISHABLE_KEY,
 } from '@env';
 
 // Convert string booleans to actual booleans
@@ -25,9 +27,15 @@ export const Config = {
   GOOGLE_WEB_CLIENT_ID: GOOGLE_WEB_CLIENT_ID || '',
   GOOGLE_IOS_CLIENT_ID: GOOGLE_IOS_CLIENT_ID || '',
 
+  // Push Notifications
+  ONESIGNAL_APP_ID: ONESIGNAL_APP_ID || '',
+
   // App Information
   APP_NAME: APP_NAME || 'KickstartRN',
   APP_VERSION: APP_VERSION || '1.0.0',
+
+  // Stripe Configuration
+  STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY || '',
 } as const;
 
 export default Config;
