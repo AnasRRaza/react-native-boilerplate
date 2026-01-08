@@ -23,11 +23,21 @@ export const USER_ENDPOINTS = {
   UPDATE_PROFILE: '/users/update-profile',
   DELETE_ACCOUNT: '/users/delete-account',
   UPLOAD_MEDIA: '/media/upload',
+  RESPOND_FRIEND_REQUEST: '/users/respond-friend-request',
+} as const;
+
+export const NOTIFICATION_ENDPOINTS = {
+  NOTIFICATIONS: '/notifications',
+  READ_NOTIFICATION: '/notifications',
+  READ_NOTIFICATIONS: '/notifications/mark-all-read',
+  NOTIFICATIONS_UNREAD: '/notifications/unread-count',
+  NOTIFICATION_STREAM: '/notifications/stream',
 } as const;
 
 export const ENDPOINTS = {
   ...AUTH_ENDPOINTS,
   ...USER_ENDPOINTS,
+  ...NOTIFICATION_ENDPOINTS,
 } as const;
 
 export default ENDPOINTS;

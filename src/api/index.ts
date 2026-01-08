@@ -1,2 +1,7 @@
 export { default as apiClient, getAuthToken, setAuthToken } from './client';
-export { AUTH_ENDPOINTS, ENDPOINTS, USER_ENDPOINTS } from './endpoints';
+export {
+  AUTH_ENDPOINTS,
+  ENDPOINTS,
+  NOTIFICATION_ENDPOINTS,
+  USER_ENDPOINTS,
+} from './endpoints';
